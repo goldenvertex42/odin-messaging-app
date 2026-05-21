@@ -1,0 +1,40 @@
+{
+  "name": "js-monorepo-template",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend",
+    "db"
+  ],
+  "description": "A template for building a monorepo that uses Vite/React, Express, and Prisma via npm workspaces",
+  "main": "index.js",
+  "scripts": {
+    "dev:backend": "node --env-file=.env --watch backend/src/app.js",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    
+    "db:push": "npx prisma db push --schema=db/prisma/schema.prisma",
+    "db:generate": "PRISMA_SKIP_POSTINSTALL_GENERATE=true npx prisma generate --schema=db/prisma/schema.prisma",
+    "db:seed": "node db/prisma/direct-seed.js",
+    
+    "build:frontend": "npm run build --workspace=frontend",
+    "build": "npm run db:generate && npm run build:frontend",
+
+    "start": "node backend/src/app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/goldenvertex42/js-monorepo-template.git"
+  },
+  "keywords": [],
+  "author": "Denver Clark, III",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/goldenvertex42/js-monorepo-template/issues"
+  },
+  "homepage": "https://github.com/goldenvertex42/js-monorepo-template#readme",
+  "devDependencies": {
+    "concurrently": "^9.2.1"  }
+}
