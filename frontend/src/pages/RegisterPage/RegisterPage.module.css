@@ -1,0 +1,27 @@
+/* frontend/src/components/auth/RegisterPage.module.css */
+/* Inherits structural designs but tints primary identities green */
+@import "../LoginPage/LoginPage.module.css";
+
+.title {
+  color: #34d399;
+}
+
+.input:focus {
+  border-color: #10b981;
+}
+
+.submitBtn {
+  background-color: #059669;
+}
+
+.submitBtn:hover {
+  background-color: #10b981;
+}
+
+.submitBtn:disabled {
+  background-color: #065f46;
+}
+
+.link {
+  color: #34d399;
+}
