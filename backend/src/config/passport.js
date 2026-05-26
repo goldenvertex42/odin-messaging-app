@@ -1,36 +1,34 @@
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
+import { Strategy as JWTStrategy, ExtractJwt } from 'passport-jwt'; // Add this import
 import bcrypt from 'bcryptjs';
 import { prisma } from '../../../db/src/index.js';
 
-// Configure the Passport-Local Strategy
+// 1. PASSPORT-LOCAL STRATEGY (Used strictly during POST /api/auth/login)
 passport.use(
   new LocalStrategy(
     {
-      usernameField: 'email', // Users will log in using their email
+      usernameField: 'email',
       passwordField: 'password',
     },
     async (email, password, done) => {
       try {
-        // Look up the user by email
         const user = await prisma.user.findUnique({ where: { email } });
-        
         if (!user) {
           return done(null, false, { message: 'Incorrect email or password.' });
         }
 
-        // Catch OAuth-only users attempting a standard password login
         if (!user.passwordHash) {
-          return done(null, false, { message: 'Account registered via third-party provider. Please sign in with OAuth.' });
+          return done(null, false, { 
+            message: 'Account registered via third-party provider. Please sign in with OAuth.' 
+          });
         }
 
-        // Verify the provided password against the hashed record
         const isMatch = await bcrypt.compare(password, user.passwordHash);
         if (!isMatch) {
           return done(null, false, { message: 'Incorrect email or password.' });
         }
 
-        // Authentication succeeds, pass the user object along
         return done(null, user);
       } catch (err) {
         return done(err);
@@ -39,30 +37,40 @@ passport.use(
   )
 );
 
-// Serialize user into the session store (stores just the user ID)
-passport.serializeUser((user, done) => {
-  done(null, user.id);
-});
+// 2. PASSPORT-JWT STRATEGY (Used to protect all other incoming API requests)
+passport.use(
+  new JWTStrategy(
+    {
+      // Automatically extracts "Bearer <token>" from the Authorization header
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      secretOrKey: process.env.JWT_SECRET || 'fallback_secret_key_for_testing',
+    },
+    async (jwtPayload, done) => {
+      try {
+        // Fetch the user based on the ID stored in the token payload
+        const user = await prisma.user.findUnique({
+          where: { id: jwtPayload.id },
+          select: {
+            id: true,
+            email: true,
+            username: true,
+            displayName: true,
+            avatarUrl: true,
+            bio: true,
+            isOnline: true,
+          },
+        });
 
-// Deserialize user from the session store back into req.user
-passport.deserializeUser(async (id, done) => {
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        email: true,
-        username: true,
-        displayName: true,
-        avatarUrl: true,
-        bio: true,
-        isOnline: true,
-      },
-    });
-    done(null, user);
-  } catch (err) {
-    done(err);
-  }
-});
+        if (!user) {
+          return done(null, false); // Token is valid, but user no longer exists
+        }
+
+        return done(null, user); // Successfully populates req.user
+      } catch (err) {
+        return done(err, false);
+      }
+    }
+  )
+);
 
 export default passport;

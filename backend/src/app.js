@@ -1,7 +1,6 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
-import session from 'express-session';
 import passport from './config/passport.js'; 
 import { prisma } from "../../db/src/index.js";
 import authRouter from './routes/auth/auth.routes.js';
@@ -26,8 +25,8 @@ const allowedOrigin = process.env.VITE_API_URL
 
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' ? process.env.PRODUCTION_FRONTEND_URL : allowedOrigin,
-  methods: ['GET', 'POST'],
-  allowedHeaders: ['Content-Type'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true, 
   optionsSuccessStatus: 200 
 };
@@ -35,21 +34,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: process.env.NODE_ENV === 'production', // true requires HTTPS production certificates
-      httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 24 * 7, // Session lifespan: 7 Days
-    },
-  })
-);
-
 app.use(passport.initialize());
-app.use(passport.session());
 
 app.get('/api/test', (req, res) => {
   res.json({ message: "🚀 Hello from the monorepo backend API!" });

@@ -1,6 +1,16 @@
 import bcrypt from 'bcryptjs';
 import passport from 'passport';
+import jwt from 'jsonwebtoken';
 import { prisma } from '../../../../db/src/index.js';
+
+// Helper function to generate stateless JWTs
+const generateToken = (userId) => {
+  return jwt.sign(
+    { id: userId }, 
+    process.env.JWT_SECRET || 'fallback_secret_key_for_testing', 
+    { expiresIn: '1d' } // Token expires in 24 hours
+  );
+};
 
 export const registerUser = async (req, res, next) => {
   try {
@@ -15,6 +25,7 @@ export const registerUser = async (req, res, next) => {
     const existingUser = await prisma.user.findFirst({
       where: { OR: [{ email }, { username }] }
     });
+
     if (existingUser) {
       return res.status(400).json({ message: 'Email or Username already taken.' });
     }
@@ -25,11 +36,11 @@ export const registerUser = async (req, res, next) => {
 
     // Create the user record
     const newUser = await prisma.user.create({
-      data: {
-        email,
-        username,
-        displayName,
-        passwordHash
+      data: { 
+        email, 
+        username, 
+        displayName: displayName || username, 
+        passwordHash 
       },
       select: {
         id: true,
@@ -43,27 +54,54 @@ export const registerUser = async (req, res, next) => {
       }
     });
 
-    return res.status(201).json(newUser);
+    // Automatically log the user in by generating a token upon registration
+    const token = generateToken(newUser.id);
+
+    return res.status(201).json({
+      message: 'User registered successfully.',
+      token,
+      user: newUser
+    });
   } catch (error) {
     next(error);
   }
 };
 
 export const loginUser = (req, res, next) => {
-  passport.authenticate('local', (err, user, info) => {
-    if (err) return next(err);
-    if (!user) return res.status(401).json({ message: info?.message || 'Login failed.' });
+  try {
+    // Passport's middleware successfully completed, so req.user is ready!
+    const user = req.user;
 
-    req.logIn(user, (loginErr) => {
-      if (loginErr) return next(loginErr);
-      return res.status(200).json({ message: 'Logged in successfully.', user });
+    // Clean up sensitive table maps before sending to your React client
+    const safeUser = {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      displayName: user.displayName,
+      avatarUrl: user.avatarUrl,
+      bio: user.bio,
+      isOnline: user.isOnline
+    };
+
+    // Issue the stateless web token
+    const token = generateToken(user.id);
+
+    return res.status(200).json({
+      message: 'Logged in successfully.',
+      token,
+      user: safeUser
     });
-  })(req, res, next);
+  } catch (error) {
+    return next(error);
+  }
 };
 
 export const getMe = (req, res) => {
+  // req.user is populated automatically by passport.authenticate('jwt', { session: false })
+  // which you will run as a middleware on the route definition file itself.
   if (!req.user) {
     return res.status(401).json({ message: 'Unauthorized.' });
   }
+  
   return res.status(200).json(req.user);
 };
