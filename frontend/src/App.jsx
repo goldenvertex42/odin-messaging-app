@@ -1,25 +1,40 @@
-import { useState, useEffect } from 'react';
+import { Routes, Route, Navigate } from 'react-router';
+import LoginPage from './pages/LoginPage/LoginPage';
+import RegisterPage from './pages/RegisterPage/RegisterPage';
+import ConversationsPage from './pages/ConversationPage/ConversationsPage';
+import ProtectedRoute from './components/auth/ProtectedRoute/ProtectedRoute';
+import LoadingSpinner from './components/ui/LoadingSpinner/LoadingSpinner';
+import { useAuth } from './hooks/useAuth/useAuth';
+import './App.css';
 
-function App() {
-  const [message, setMessage] = useState('Connecting to API...');
+export default function App() {
+  const { user, loading, login } = useAuth();
 
-  useEffect(() => {
-    // Points directly to your Express backend local development port
-    fetch('http://localhost:3000/api/test')
-      .then((res) => {
-        if (!res.ok) throw new Error('API server returned an error');
-        return res.json();
-      })
-      .then((data) => setMessage(data.message || 'Connected!'))
-      .catch((err) => setMessage(`❌ API Connection Failed: ${err.message}`));
-  }, []);
+  // One line, completely clean, self-contained loading state
+  if (loading) return <LoadingSpinner />;
 
   return (
-    <div style={{ fontFamily: 'sans-serif', padding: '40px', textAlign: 'center' }}>
-      <h1>Monorepo Frontend Template</h1>
-      <p style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{message}</p>
-    </div>
+    <Routes>
+      <Route 
+        path="/login" 
+        element={user ? <Navigate to="/conversations" replace /> : <LoginPage onAuthSuccess={login} />} 
+      />
+      <Route 
+        path="/register" 
+        element={user ? <Navigate to="/conversations" replace /> : <RegisterPage onAuthSuccess={login} />} 
+      />
+      <Route 
+        path="/conversations" 
+        element={
+          <ProtectedRoute user={user} loading={loading}>
+            <ConversationsPage user={user} />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="*" 
+        element={<Navigate to={user ? "/conversations" : "/login"} replace />} 
+      />
+    </Routes>
   );
 }
-
-export default App;
