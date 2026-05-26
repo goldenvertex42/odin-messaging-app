@@ -1,8 +1,8 @@
-import { screen, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
+import { render, screen, waitForElementToBeRemoved } from '@testing-library/react';
+import { BrowserRouter } from 'react-router';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { http, HttpResponse } from 'msw';
 import { server } from './mocks/server';
-import { renderWithRouter } from '../tests/test-utils';
 import App from './App';
 
 describe('App Layout Routing - Production Style TDD Suite', () => {
@@ -11,59 +11,69 @@ describe('App Layout Routing - Production Style TDD Suite', () => {
 
   beforeEach(() => {
     vi.restoreAllMocks();
-    localStorage.clear(); // Ensure storage begins completely empty
+    localStorage.clear();
   });
 
   afterEach(() => {
     localStorage.clear();
   });
 
+  // Helper function to mount App cleanly within a real, clean router context
+  const renderAppInRouter = () => {
+    return render(
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    );
+  };
+
   // 1. TEST INITIAL LOOKUP SPIN STATE
   it('should render the shared loading layout spinner during initial session lookup', async () => {
-    localStorage.setItem('token', mockToken); // Seed token to pass optimization guard
+    localStorage.setItem('token', mockToken);
     vi.spyOn(globalThis, 'fetch').mockImplementation(() => new Promise(() => {}));
 
-    renderWithRouter(<App />, { route: '/', path: '/*' });
+    renderAppInRouter();
 
-    await waitFor(() => {
-      expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
-    });
+    expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
   });
 
   // 2. TEST UNAUTHORIZED REDIRECTION LIFECYCLE
   it('should direct unauthenticated sessions cleanly to the login landing grid', async () => {
-    // If no token exists, useAuth skips network calls and sets loading to false immediately
-    renderWithRouter(<App />, { route: '/', path: '/*' });
+    // If no token exists, useAuth instantly drops loading to false and redirects
+    renderAppInRouter();
 
-    // Since loading drops immediately without a token, look for the text from your LoginPage element
-    // Note: Adjust the regex if your actual LoginPage uses different button or heading text
-    const loginView = await screen.findByText(/login page form view/i);
+    // Verify the real LoginPage components load seamlessly
+    const loginView = await screen.findByText(/welcome back/i);
     expect(loginView).toBeInTheDocument();
   });
 
   // 3. TEST EXPIRED TOKEN TO LOGIN REDIRECTION
   it('should redirect to login if an existing token returns a 401 unauthenticated response', async () => {
     localStorage.setItem('token', 'expired-token');
-    
+
     server.use(
       http.get(`${API_URL}/auth/me`, () => {
         return HttpResponse.json({ error: 'Token expired' }, { status: 401 });
       })
     );
 
-    renderWithRouter(<App />, { route: '/', path: '/*' });
+    renderAppInRouter();
+    
+    // First, verify the loading spinner mounts securely while MSW queries
+    expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
 
-    const spinner = await screen.findByTestId('loading-spinner');
-    await waitForElementToBeRemoved(spinner);
+    // Force the test framework to wait until the async MSW mock completes
+    await waitForElementToBeRemoved(() => screen.queryByTestId('loading-spinner'));
 
-    const loginView = await screen.findByText(/login page form view/i);
+    // Assert that the real login screen mounts
+    const loginView = await screen.findByText(/welcome back/i);
     expect(loginView).toBeInTheDocument();
   });
 
   // 4. TEST SECURE DASHBOARD ACCESSIBILITY
   it('should unlock dashboard if identity responds with a valid profile payload', async () => {
     const mockProfile = { id: 'uuid-1', username: 'odin_warrior' };
-    localStorage.setItem('token', mockToken); // Seed token to trigger the mock endpoint
+    localStorage.setItem('token', mockToken);
 
     server.use(
       http.get(`${API_URL}/auth/me`, () => {
@@ -71,13 +81,15 @@ describe('App Layout Routing - Production Style TDD Suite', () => {
       })
     );
 
-    renderWithRouter(<App />, { route: '/', path: '/*' });
+    renderAppInRouter();
 
-    const spinner = await screen.findByTestId('loading-spinner');
-    await waitForElementToBeRemoved(spinner);
+    expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
 
-    // Matches the exact header string from your ConversationsPage refactor!
-    const dashboardView = await screen.findByText(/conversations dashboard page/i);
+    // Wait for MSW to resolve the mock profile data and clear the spinner
+    await waitForElementToBeRemoved(() => screen.queryByTestId('loading-spinner'));
+
+    // Assert that the real ConversationsPage component placeholder mounts successfully
+    const dashboardView = await screen.findByText(/your chat threads dashboard placeholder/i);
     expect(dashboardView).toBeInTheDocument();
   });
 });
