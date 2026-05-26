@@ -17,7 +17,7 @@ describe('LoginPage Component - Integration TDD Suite', () => {
 
   const waitForRouterToHydrate = async () => {
     await waitFor(() => {
-      expect(screen.queryByText(/syncing context state\.\.\./i)).not.toBeInTheDocument();
+      expect(screen.queryByTestId('router-sync')).not.toBeInTheDocument();
     });
   };
 
@@ -38,6 +38,9 @@ describe('LoginPage Component - Integration TDD Suite', () => {
     const user = userEvent.setup();
     const mockUserPayload = { id: 'user-valhalla', username: 'odin_coder' };
     const mockTokenString = 'jwt-valid-token-example';
+    
+    // Create a spy component to ensure the router correctly mounts the targeted layout destination
+    const mockDashboardComponent = vi.fn(() => <div data-testid="real-dashboard">Dashboard View</div>);
 
     server.use(
       http.post(`${API_URL}/auth/login`, () => {
@@ -48,25 +51,38 @@ describe('LoginPage Component - Integration TDD Suite', () => {
       })
     );
 
-    // Removed the "router" extraction variable entirely to fix the undefined crash
-    renderWithRouter(<LoginPage onAuthSuccess={mockOnAuthSuccess} />, { route: '/login', path: '/login' });
+    // FIXED: Utilizing the dynamic customRoutes parameter configuration!
+    renderWithRouter(<LoginPage onAuthSuccess={mockOnAuthSuccess} />, { 
+      route: '/login', 
+      path: '/login',
+      customRoutes: [
+        {
+          path: '/login',
+          Component: () => <LoginPage onAuthSuccess={mockOnAuthSuccess} />,
+          HydrateFallback: () => <div data-testid="router-sync">Syncing context state...</div>
+        },
+        {
+          path: '/conversations',
+          Component: mockDashboardComponent
+        }
+      ]
+    });
+    
     await waitForRouterToHydrate();
 
-    // Removed manual wrap of act() since userEvent handles internal event loops safely
     await user.type(screen.getByLabelText(/email address/i), 'tester@odin.com');
     await user.type(screen.getByLabelText(/password/i), 'password123');
     await user.click(screen.getByRole('button', { name: /sign in/i }));
 
-    // Verify context triggers fire matching payload formats
+    // Verify context state callbacks dispatch with exact matching arguments
     await waitFor(() => {
       expect(mockOnAuthSuccess).toHaveBeenCalledWith(mockUserPayload, mockTokenString);
     });
 
-    // Clean Production-Style Route Verification:
-    // Because a successful submit triggers navigate('/conversations'), the LoginPage gets unmounted.
-    // We assert navigation success by ensuring the login page headers are missing from the screen!
+    // Ensure the route transition has been triggered and unmounted the form view
     await waitFor(() => {
-      expect(screen.queryByText(/welcome back/i)).not.toBeInTheDocument();
+      expect(mockDashboardComponent).toHaveBeenCalled();
+      expect(screen.getByTestId('real-dashboard')).toBeInTheDocument();
     });
   });
 
