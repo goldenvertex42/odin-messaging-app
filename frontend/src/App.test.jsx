@@ -70,7 +70,7 @@ describe('App Layout Routing - Production Style TDD Suite', () => {
     expect(loginView).toBeInTheDocument();
   });
 
-  // 4. TEST SECURE DASHBOARD ACCESSIBILITY
+    // 4. TEST SECURE DASHBOARD ACCESSIBILITY
   it('should unlock dashboard if identity responds with a valid profile payload', async () => {
     const mockProfile = { id: 'uuid-1', username: 'odin_warrior' };
     localStorage.setItem('token', mockToken);
@@ -78,6 +78,10 @@ describe('App Layout Routing - Production Style TDD Suite', () => {
     server.use(
       http.get(`${API_URL}/auth/me`, () => {
         return HttpResponse.json(mockProfile, { status: 200 });
+      }),
+      
+      http.get(`${API_URL}/conversations`, () => {
+        return HttpResponse.json({ success: true, data: [] }, { status: 200 });
       })
     );
 
@@ -85,11 +89,10 @@ describe('App Layout Routing - Production Style TDD Suite', () => {
 
     expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
 
-    // Wait for MSW to resolve the mock profile data and clear the spinner
     await waitForElementToBeRemoved(() => screen.queryByTestId('loading-spinner'));
 
-    // Assert that the real ConversationsPage component placeholder mounts successfully
-    const dashboardView = await screen.findByText(/your chat threads dashboard placeholder/i);
-    expect(dashboardView).toBeInTheDocument();
+    const dashboardHeader = await screen.findByRole('heading', { name: /conversations/i });
+    expect(dashboardHeader).toBeInTheDocument();
   });
+
 });
