@@ -61,6 +61,11 @@ describe('Conversations & Messages API - TDD Suite (Stateless JWT)', () => {
       expect(res.body.success).toBe(true);
       expect(Array.isArray(res.body.data)).toBe(true);
     });
+
+    it('GET /api/conversations/:id - should return 401 for unauthenticated requests', async () => {
+      const res = await request(app).get(`/api/conversations/${activeConversationId || 1}`);
+      expect(res.status).toBe(401);
+    });
   });
 
   // ==========================================
@@ -86,6 +91,18 @@ describe('Conversations & Messages API - TDD Suite (Stateless JWT)', () => {
       expect(res.body.data).toHaveProperty('id');
       expect(res.body.data.isGroup).toBe(false);
       activeConversationId = res.body.data.id;
+    });
+
+    it('should return a single conversation detail for an authenticated participant', async () => {
+      const res = await request(app)
+        .get(`/api/conversations/${activeConversationId}`)
+        .set('Authorization', `Bearer ${userJwtToken}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.data).toHaveProperty('id', activeConversationId);
+      expect(res.body.data).toHaveProperty('participants');
+      expect(Array.isArray(res.body.data.participants)).toBe(true);
     });
 
     it('should return the existing conversation object instead of a duplicate for 1:1 threads', async () => {

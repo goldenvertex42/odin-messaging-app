@@ -1,46 +1,53 @@
 import { prisma } from '../../../../db/src/index.js';
 
 // GET /api/conversations
-export const getUserConversations = async (req, res) => {
-  try {
-    const userId = req.user.id;
+export const getConversations = async (req, res) => {
+  const userId = req.user.id; // Extracted from your Passport-JWT barrier middleware
 
-    const conversations = await prisma.conversation.findMany({
-      where: { 
-        participants: { some: { userId: userId } } 
-      },
-      include: {
-        // CORRECT: Use uniform select layers when filtering nested model properties
+  try {
+    const channels = await prisma.conversation.findMany({
+      where: {
         participants: {
-          select: {
-            id: true,
-            isAdmin: true,
-            userId: true,
-            user: {
-              select: { 
-                id: true, 
-                displayName: true, 
-                avatarUrl: true, 
-                isOnline: true 
-              }
+          some: { userId }
+        }
+      },
+      orderBy: [
+        { updatedAt: 'desc' },
+        { id: 'desc' }
+      ],
+      include: {
+        // 🎯 THE CRITICAL FIX: Fetch only the single most recent message
+        messages: {
+          orderBy: {
+            createdAt: 'desc'
+          },
+          take: 1,
+          include: {
+            sender: {
+              select: { username: true } // Know who sent the last snippet
             }
           }
         },
-        messages: {
-          orderBy: { createdAt: 'desc' },
-          take: 1
+        participants: {
+          include: {
+            user: {
+              select: { id: true, username: true, displayName: true, isOnline: true }
+            }
+          }
         }
-      },
-      orderBy: { updatedAt: 'desc' }
+      }
     });
 
-    return res.status(200).json({ success: true, data: conversations });
+    return res.status(200).json({
+      success: true,
+      data: channels
+    });
   } catch (error) {
-    // This logs the exact trace in your terminal if any other syntax bugs creep in
-    console.error("❌ Prisma Conversations Fetch Crash:", error.message);
-    return res.status(500).json({ success: false, error: error.message });
+    console.error('Failed to synchronize sidebar channels:', error);
+    return res.status(500).json({ success: false, error: 'Internal server error.' });
   }
 };
+
 
 
 // POST /api/conversations
@@ -113,6 +120,54 @@ export const createConversation = async (req, res) => {
       include: { participants: true }
     });
     return res.status(201).json({ success: true, data: newGroupChat });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// GET /api/conversations/:id
+export const getConversation = async (req, res) => {
+  try {
+    const conversationId = req.params.id;
+
+    const conversation = await prisma.conversation.findUnique({
+      where: { id: conversationId },
+      include: {
+        participants: {
+          select: {
+            id: true,
+            isAdmin: true,
+            userId: true,
+            user: {
+              select: {
+                id: true,
+                displayName: true,
+                avatarUrl: true,
+                isOnline: true
+              }
+            }
+          }
+        },
+        messages: {
+          orderBy: { createdAt: 'asc' },
+          include: {
+            sender: {
+              select: {
+                id: true,
+                displayName: true,
+                avatarUrl: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (!conversation) {
+      return res.status(404).json({ success: false, error: 'Conversation not found' });
+    }
+
+    return res.status(200).json({ success: true, data: conversation });
   } catch (error) {
     return res.status(500).json({ success: false, error: error.message });
   }
