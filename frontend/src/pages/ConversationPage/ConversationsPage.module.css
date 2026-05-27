@@ -1,0 +1,16 @@
+.workspace {
+  display: flex;
+  width: 100vw;
+  height: 100dvh; /* Enforces fluid dynamic layout reset standard */
+  background-color: #0f172a; /* Deep canvas theme background */
+  overflow: hidden; /* Hard blocks layout leaks and unwanted scrolls */
+  box-sizing: border-box;
+}
+
+/* Responsive adjustments if layout needs phone constraints later */
+@media (max-width: 640px) {
+  .workspace {
+    flex-direction: column;
+  }
+}
+
