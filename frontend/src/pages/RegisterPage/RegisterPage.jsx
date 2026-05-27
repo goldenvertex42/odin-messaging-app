@@ -7,13 +7,14 @@ export default function RegisterPage({ onAuthSuccess }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
   const handleRegisterSubmit = async (registrationData) => {
     setError('');
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3000/api/auth/register', {
+      const response = await fetch(`${baseUrl}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(registrationData)
