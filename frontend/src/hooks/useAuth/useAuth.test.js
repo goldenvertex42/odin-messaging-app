@@ -6,7 +6,7 @@ import { useAuth } from './useAuth';
 
 describe('useAuth Custom Hook - TDD Suite (Stateless JWT)', () => {
   const API_URL = 'http://localhost:3000/api';
-  const mockToken = 'mock-valid-jwt-string';
+  const mockToken = 'mock-valid-jwt-token';
 
   beforeEach(() => {
     vi.restoreAllMocks();
