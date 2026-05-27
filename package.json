@@ -13,20 +13,15 @@
     "dev:backend": "node --env-file=.env --watch backend/src/app.js",
     "dev:frontend": "npm run dev --workspace=frontend",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-
     "backend:test": "npm run test --workspace=backend",
     "frontend:test": "npm run test --workspace=frontend",
-
-    
     "db:test:push": "node --env-file=.env -e \"const { execSync } = require('child_process'); execSync('npx prisma db push --schema=./db/prisma/schema.prisma', { env: { ...process.env, DATABASE_URL: process.env.TEST_DATABASE_URL }, stdio: 'inherit' });\"",
     "db:push": "npx prisma db push --schema=db/prisma/schema.prisma",
     "db:migrate": "npx prisma migrate dev --schema=db/prisma/schema.prisma",
     "db:generate": "PRISMA_SKIP_POSTINSTALL_GENERATE=true npx prisma generate --schema=db/prisma/schema.prisma",
     "db:seed": "node db/prisma/direct-seed.js",
-    
     "build:frontend": "npm run build --workspace=frontend",
     "build": "npm run db:generate && npm run build:frontend",
-
     "start": "node backend/src/app.js"
   },
   "repository": {
@@ -42,5 +37,6 @@
   },
   "homepage": "https://github.com/goldenvertex42/odin-messaging-app#readme",
   "devDependencies": {
-    "concurrently": "^9.2.1"  }
+    "concurrently": "^9.2.1"
+  }
 }
