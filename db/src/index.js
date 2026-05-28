@@ -4,6 +4,9 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import pg from 'pg';
 
 const { Pool } = pg;
+if (!process.env.DATABASE_URL) {
+  throw new Error('Missing DATABASE_URL in environment; ensure root .env is loaded before Prisma initialization');
+}
 console.log("CRITICAL CHECK - Backend connecting to database:", process.env.DATABASE_URL);
 // 1. Establish the native PostgreSQL TCP connection pool
 const pool = new Pool({
