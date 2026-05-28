@@ -45,3 +45,72 @@ h1, h2, h3, h4, h5, h6 {
 #root, #__next {
   isolation: isolate;
 }
+
+/* ==========================================================================
+   GLOBAL DESIGN MATRIX: 5-OPTION THEME SWITCHER VARIABLES
+   ========================================================================== */
+
+/* 🖤 1. SLATE THEME (Default Engine Skin) */
+:root, [data-theme="SLATE"] {
+  --bg-sidebar: #1e293b;
+  --bg-workspace: #ffffff;
+  --border-color: #334155;
+  --accent-color: #38bdf8;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --btn-hover: #334155;
+  --btn-action-bg: #334155;
+  --btn-action-hover: #475569;
+}
+
+/* 💚 2. EMERALD THEME */
+[data-theme="EMERALD"] {
+  --bg-sidebar: #064e3b;
+  --bg-workspace: #ffffff;
+  --border-color: #065f46;
+  --accent-color: #34d399;
+  --text-main: #f0fdf4;
+  --text-muted: #a7f3d0;
+  --btn-hover: #065f46;
+  --btn-action-bg: #065f46;
+  --btn-action-hover: #047857;
+}
+
+/* 💙 3. OCEAN THEME */
+[data-theme="OCEAN"] {
+  --bg-sidebar: #0c4a6e;
+  --bg-workspace: #ffffff;
+  --border-color: #075985;
+  --accent-color: #38bdf8;
+  --text-main: #f0f9ff;
+  --text-muted: #bae6fd;
+  --btn-hover: #075985;
+  --btn-action-bg: #075985;
+  --btn-action-hover: #0369a1;
+}
+
+/* 💜 4. AMETHYST THEME */
+[data-theme="AMETHYST"] {
+  --bg-sidebar: #4c1d95;
+  --bg-workspace: #ffffff;
+  --border-color: #5b21b6;
+  --accent-color: #c084fc;
+  --text-main: #f5f3ff;
+  --text-muted: #ddd6fe;
+  --btn-hover: #5b21b6;
+  --btn-action-bg: #5b21b6;
+  --btn-action-hover: #6d28d9;
+}
+
+/* 🌹 5. ROSE THEME */
+[data-theme="ROSE"] {
+  --bg-sidebar: #881337;
+  --bg-workspace: #ffffff;
+  --border-color: #9f1239;
+  --accent-color: #fb7185;
+  --text-main: #fff1f2;
+  --text-muted: #fecdd3;
+  --btn-hover: #9f1239;
+  --btn-action-bg: #9f1239;
+  --btn-action-hover: #be123c;
+}

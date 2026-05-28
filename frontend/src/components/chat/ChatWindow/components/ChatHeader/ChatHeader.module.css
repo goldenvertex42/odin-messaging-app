@@ -1,12 +1,12 @@
 .header {
   padding: 1.25rem;
-  background-color: #1e293b;
-  border-bottom: 1px solid #334155;
+  background-color: var(--bg-sidebar); 
+  border-bottom: 1px solid var(--border-color); 
 }
 
 .header h4 {
   margin: 0;
   font-size: 1.125rem;
-  color: #f8fafc;
+  color: var(--text-main); 
   font-family: sans-serif;
 }

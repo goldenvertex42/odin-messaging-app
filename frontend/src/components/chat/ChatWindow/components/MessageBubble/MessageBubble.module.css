@@ -20,10 +20,11 @@
 .senderLabel {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #555555;
+  color: var(--text-muted); /* 🎯 UPGRADED */
   margin-bottom: 3px;
   margin-left: 6px;
   text-transform: lowercase;
+  font-family: sans-serif;
 }
 
 .bubble {
@@ -33,18 +34,20 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
+/* Outgoing messages sent by the logged-in user */
 .bubbleMe {
-  background-color: #0066cc;
-  color: #ffffff;
+  background-color: var(--accent-color); /* 🎯 UPGRADED */
+  color: #0f172a; /* 🎯 HIGH UTILITY: Keeps text readable against bright accent palettes */
   border-bottom-right-radius: 2px;
 }
 
+/* Incoming messages sent by foreign thread participants */
 .bubbleThem {
-  background-color: #f1f0f0;
-  color: #1a1a1a;
+  background-color: var(--btn-hover); /* 🎯 UPGRADED: Blends cleanly with the dark themes */
+  color: var(--text-main); /* 🎯 UPGRADED */
   border-bottom-left-radius: 2px;
 }
 
@@ -53,12 +56,23 @@
   font-size: 0.95rem;
   line-height: 1.4;
   word-break: break-word;
+  font-family: sans-serif;
 }
 
 .timestamp {
   font-size: 0.68rem;
   opacity: 0.75;
   align-self: flex-end;
+  font-family: sans-serif;
+}
+
+/* Outgoing timestamps use dark text; incoming timestamps use muted theme text */
+.bubbleMe .timestamp {
+  color: #0f172a;
+}
+
+.bubbleThem .timestamp {
+  color: var(--text-muted);
 }
 
 .mediaAttachment {

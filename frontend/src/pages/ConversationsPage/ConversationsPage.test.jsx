@@ -45,16 +45,15 @@ describe('ConversationsPage - Cross-Component Integration Suite', () => {
       conversations: sampleChats,
       loading: false,
       error: null,
-      refreshConversations: vi.fn(),
-      startConversation: vi.fn(),
-      createGroupChat: vi.fn()
+      setConversations: vi.fn(),
+      createConversation: vi.fn()
     });
 
     render(<ConversationsPage user={sampleUser} />);
 
     expect(screen.getByTestId('conversations-page-container')).toBeInTheDocument();
     expect(screen.getByTestId('sidebar-container')).toBeInTheDocument();
-    expect(screen.getByTestId('chat-window-mock')).toHaveTextContent(/placeholder view/i);
+    expect(screen.getByText(/select a conversation thread or launch a new chat channel to begin/i)).toBeInTheDocument();
   });
 
   // B. TEST INTER-COMPONENT COMMUNICATION FLOWS
@@ -66,9 +65,8 @@ describe('ConversationsPage - Cross-Component Integration Suite', () => {
       conversations: sampleChats,
       loading: false,
       error: null,
-      refreshConversations: vi.fn(),
-      startConversation: vi.fn(),
-      createGroupChat: vi.fn()
+      setConversations: vi.fn(),
+      createConversation: vi.fn()
     });
 
     render(<ConversationsPage user={sampleUser} />);

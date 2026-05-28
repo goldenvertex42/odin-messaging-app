@@ -1,0 +1,33 @@
+.workspace {
+  display: flex;
+  width: 100vw;
+  height: 100dvh; /* Fluid full-screen enforcement */
+  overflow: hidden; /* Prevent parent layout clipping */
+  
+  background-color: var(--bg-workspace); 
+}
+
+.loadingCenter {
+  composes: workspace; /* Inherits the base full-screen flex layout */
+  justify-content: center;
+  align-items: center;
+  
+  background-color: var(--bg-workspace);
+}
+
+.emptyLanding {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: sans-serif;
+  
+  background-color: var(--bg-workspace);
+  color: var(--text-muted);
+}
+
+@media (max-width: 768px) {
+  .workspace {
+    flex-direction: column;
+  }
+}
