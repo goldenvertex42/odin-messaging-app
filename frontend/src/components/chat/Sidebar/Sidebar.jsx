@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
-import { useConversations } from '../../../hooks/useConversations/useConversations';
+import { Link } from 'react-router';
+import LoadingSpinner from '../../ui/LoadingSpinner/LoadingSpinner';
 import NewChatButton from './components/NewChatButton/NewChatButton';
 import styles from './Sidebar.module.css';
 
@@ -14,7 +15,7 @@ const getConversationTitle = (chat, currentUserId) => {
   return recipient?.user?.displayName || recipient?.user?.username || 'Odin User';
 };
 
-const getPreviewText = (chat) => {
+const getPreviewText = (chat, currentUserId) => {
   const messages = chat.messages || [];
   if (messages.length === 0) return 'No messages yet';
 
@@ -38,7 +39,7 @@ const getPreviewText = (chat) => {
 
   if (!latestMessage) return 'No messages yet';
 
-  const senderName = latestMessage.sender?.username || latestMessage.sender?.displayName;
+  const senderName = latestMessage.sender?.id === currentUserId ? 'You' : latestMessage.sender?.username;
   const prefix = (chat.isGroup && senderName) ? `${senderName}: ` : '';
 
   return `${prefix}${latestMessage.content || 'Shared an attachment'}`;
@@ -49,6 +50,7 @@ const getPreviewText = (chat) => {
 function SidebarLoading() {
   return (
     <div data-testid="sidebar-loading" className={styles.loading}>
+      <LoadingSpinner/>
       <span>Synchronizing...</span>
     </div>
   );
@@ -63,52 +65,56 @@ function SidebarHeader({ onCreateConversation }) {
   );
 }
 
-function ConversationList({ conversations, currentUserId, onSelectChat }) {
+function ConversationList({ conversations, activeChatId, currentUserId, onSelectChat }) {
+  const isActive = useCallback((chatId) => chatId === activeChatId, [activeChatId]);
+  
   return (
     <ul className={styles.list}>
       {conversations.map((chat) => (
         <li
           key={chat.id}
-          className={styles.chatItem}
+          className={`${styles.chatItem} ${isActive(chat.id) ? styles.isActive : ''}`}
           onClick={() => onSelectChat(chat)}
         >
           <div className={styles.chatName}>{getConversationTitle(chat, currentUserId)}</div>
-          <div className={styles.preview}>{getPreviewText(chat)}</div>
+          <div className={styles.preview}>{getPreviewText(chat, currentUserId)}</div>
         </li>
       ))}
     </ul>
   );
 }
 
-export default function Sidebar({ currentUserId, onSelectChat }) {
-  const { conversations, loading, error, createConversation } = useConversations();
+function SidebarFooter() {
+  return (
+    <div className={styles.footer}>
+      <Link to="/logout" className={styles.logoutBtn}>Logout</Link>
+    </div>
+  );
+}
 
+export default function Sidebar({ conversations = [], activeChatId, currentUserId, onSelectChat, onCreateConversation }) {
   const handleCreateConversation = useCallback(
     async (usernames) => {
-      const newConversation = await createConversation(usernames);
+      if (!onCreateConversation) return null;
+      const newConversation = await onCreateConversation(usernames);
       if (newConversation) {
         onSelectChat(newConversation);
       }
       return newConversation;
     },
-    [createConversation, onSelectChat]
+    [onCreateConversation, onSelectChat]
   );
-
-  if (loading) {
-    return <SidebarLoading />;
-  }
 
   return (
     <aside className={styles.sidebar} data-testid="sidebar-container">
       <SidebarHeader onCreateConversation={handleCreateConversation} />
-
-      {error && <div className={styles.error} role="alert">{error}</div>}
-
       <ConversationList
         conversations={conversations}
+        activeChatId={activeChatId}
         currentUserId={currentUserId}
         onSelectChat={onSelectChat}
       />
+      <SidebarFooter />
     </aside>
   );
 }
