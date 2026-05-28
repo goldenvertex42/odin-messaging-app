@@ -13,10 +13,9 @@ async function run() {
   await client.connect();
   
   try {
-    // 💡 Start SQL transaction block to surface errors clearly
     await client.query('BEGIN;');
 
-    console.log("🌱 Starting direct SQL database seeding...");
+    console.log("🌱 Starting direct SQL database seeding with dynamic profile support...");
 
     // 1. Clean the database in reverse order of foreign keys
     console.log("🧹 Wiping existing data...");
@@ -26,31 +25,80 @@ async function run() {
     const salt = await bcrypt.genSalt(10);
     const defaultPasswordHash = await bcrypt.hash('password123', salt);
 
-    // 3. Seed Users (returning IDs for relational mapping)
-    console.log("👥 Injecting test users...");
+    // 3. Seed Users with updated Glyphs avatars and ProfileTheme preferences
+    console.log("👥 Injecting test users with themes and glyph avatars...");
     const usersData = [
-      ['alice@odin.com', 'alice_dev', 'Alice Smith', defaultPasswordHash, 'Building the Odin Messaging App!', true],
-      ['bob@odin.com', 'bob_builder', 'Bob Jones', defaultPasswordHash, 'Can we fix it? Yes we can.', true],
-      ['charlie@odin.com', 'charlie_brown', 'Charlie Brown', defaultPasswordHash, 'Good grief.', false],
-      ['dave@odin.com', 'dave_codes', 'Dave Miller', defaultPasswordHash, 'Fullstack explorer.', false]
+      [
+        'alice@odin.com', 
+        'alice_dev', 
+        'Alice Smith', 
+        defaultPasswordHash, 
+        'Building the Odin Messaging App!', 
+        'https://api.dicebear.com/10.x/glyphs/svg', 
+        'AMETHYST', 
+        true
+      ],
+      [
+        'bob@odin.com', 
+        'bob_builder', 
+        'Bob Jones', 
+        defaultPasswordHash, 
+        'Can we fix it? Yes we can.', 
+        'https://api.dicebear.com/10.x/glyphs/svg',
+        'OCEAN', 
+        true
+      ],
+      [
+        'charlie@odin.com', 
+        'charlie_brown', 
+        'Charlie Brown', 
+        defaultPasswordHash, 
+        'Good grief.', 
+        'https://api.dicebear.com/10.x/glyphs/svg', 
+        'EMERALD', 
+        false
+      ],
+      [
+        'dave@odin.com', 
+        'dave_codes', 
+        'Dave Miller', 
+        defaultPasswordHash, 
+        'Fullstack explorer.', 
+        'https://api.dicebear.com/10.x/glyphs/svg',
+        'SLATE', 
+        false
+      ]
     ];
 
     const userIds = {};
     for (const row of usersData) {
       const res = await client.query(
-        `INSERT INTO "user" (id, email, username, "displayName", "passwordHash", bio, "isOnline", "createdAt", "updatedAt") 
-        VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, NOW(), NOW()) RETURNING id, username;`, 
+        `INSERT INTO "user" (
+          id, 
+          email, 
+          username, 
+          "displayName", 
+          "passwordHash", 
+          bio, 
+          "avatarUrl", 
+          "themePreference", 
+          "isOnline", 
+          "createdAt", 
+          "updatedAt"
+        ) 
+        VALUES (
+          gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7::"ProfileTheme", $8, NOW(), NOW()
+        ) 
+        RETURNING id, username;`, 
         row
       );
       
-      // Destructure safely to ensure exact string keys are extracted
       const createdUser = res.rows[0];
       if (createdUser && createdUser.username) {
         userIds[createdUser.username] = createdUser.id;
       }
     }
 
-    // Quick checkpoint: print this to your terminal to ensure keys exist before proceeding
     console.log("Verified Extracted userIds Matrix:", userIds);
 
     // 4. Seed Friendships
@@ -64,7 +112,7 @@ async function run() {
     for (const f of friendships) {
       await client.query(
         `INSERT INTO "friendship" (id, "senderId", "receiverId", status, "createdAt", "updatedAt") 
-         VALUES (gen_random_uuid(), $1, $2, $3, NOW(), NOW());`, 
+         VALUES (gen_random_uuid(), $1, $2, $3::"FriendshipStatus", NOW(), NOW());`, 
         f
       );
     }
@@ -76,7 +124,6 @@ async function run() {
     );
     const directChatId = directChatRes.rows[0].id;
 
-    // Add participants to 1-on-1 chat
     await client.query(`INSERT INTO "participant" (id, "userId", "conversationId", "isAdmin", "joinedAt") VALUES (gen_random_uuid(), $1, $2, false, NOW());`, [userIds.alice_dev, directChatId]);
     await client.query(`INSERT INTO "participant" (id, "userId", "conversationId", "isAdmin", "joinedAt") VALUES (gen_random_uuid(), $1, $2, false, NOW());`, [userIds.bob_builder, directChatId]);
 
@@ -98,7 +145,6 @@ async function run() {
     );
     const groupChatId = groupChatRes.rows[0].id;
 
-    // Add participants to group chat (Alice is Admin)
     await client.query(`INSERT INTO "participant" (id, "userId", "conversationId", "isAdmin", "joinedAt") VALUES (gen_random_uuid(), $1, $2, true, NOW());`, [userIds.alice_dev, groupChatId]);
     await client.query(`INSERT INTO "participant" (id, "userId", "conversationId", "isAdmin", "joinedAt") VALUES (gen_random_uuid(), $1, $2, false, NOW());`, [userIds.bob_builder, groupChatId]);
     await client.query(`INSERT INTO "participant" (id, "userId", "conversationId", "isAdmin", "joinedAt") VALUES (gen_random_uuid(), $1, $2, false, NOW());`, [userIds.charlie_brown, groupChatId]);
@@ -114,12 +160,10 @@ async function run() {
       await client.query(`INSERT INTO "message" (id, "conversationId", "senderId", content, "fileUrl", "createdAt") VALUES (gen_random_uuid(), $1, $2, $3, $4, NOW());`, m);
     }
 
-    // Commit changes safely if nothing errored
     await client.query('COMMIT;');
-    console.log("🚀 Direct data injection successful! Run your app and login with password: password123");
+    console.log("🚀 Direct data injection successful with Glyph avatars! Run your app and login with password: password123");
 
   } catch (error) {
-    // Roll back database changes if an error happens mid-stream
     await client.query('ROLLBACK;');
     console.error("❌ Transaction failed. Database rolled back to clear state.", error);
   } finally {

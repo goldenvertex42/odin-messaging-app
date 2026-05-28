@@ -1,8 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,25 +9,42 @@ datasource db {
   provider = "postgresql"
 }
 
+enum ProfileTheme {
+  SLATE
+  EMERALD
+  OCEAN
+  AMETHYST
+  ROSE
+}
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+  BLOCKED
+}
+
 model User {
-  id            String        @id @default(uuid())
-  email         String        @unique
-  passwordHash  String?       // Nullable to allow for future 3rd-party OAuth
-  username      String        @unique
-  displayName   String?
-  avatarUrl     String?
-  bio           String?
-  isOnline      Boolean       @default(false)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id              String         @id @default(uuid())
+  email           String         @unique
+  passwordHash    String?        // Nullable to allow for future 3rd-party OAuth
+  username        String         @unique
+  displayName     String?
+  avatarUrl       String?
+  bio             String?
+  
+  themePreference ProfileTheme   @default(SLATE)
+  
+  isOnline        Boolean        @default(false)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
 
   // Relations
-  sentMessages  Message[]
-  participants  Participant[]
-  
+  sentMessages    Message[]
+  participants    Participant[]
+
   // Self-referencing relations for the Friends List
-  friendsAdded  Friendship[]  @relation("UserSender")
-  friendsOf     Friendship[]  @relation("UserReceiver")
+  friendsAdded    Friendship[]   @relation("UserSender")
+  friendsOf       Friendship[]   @relation("UserReceiver")
 
   @@map("user")
 }
@@ -56,11 +71,10 @@ model Participant {
   joinedAt       DateTime     @default(now())
 
   // Relations
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
   @@unique([userId, conversationId]) // Prevents adding a user twice to the same chat
-
   @@map("participant")
 }
 
@@ -73,31 +87,24 @@ model Message {
   createdAt      DateTime     @default(now())
 
   // Relations
-  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  sender       User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
 
   @@map("message")
 }
 
 model Friendship {
-  id          String           @id @default(uuid())
-  senderId    String
-  receiverId  String
-  status      FriendshipStatus @default(PENDING)
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  id         String           @id @default(uuid())
+  senderId   String
+  receiverId String
+  status     FriendshipStatus @default(PENDING)
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
 
   // Relations
-  sender      User             @relation("UserSender", fields: [senderId], references: [id], onDelete: Cascade)
-  receiver    User             @relation("UserReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  sender     User             @relation("UserSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver   User             @relation("UserReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
 
   @@unique([senderId, receiverId]) // Prevents duplicate request entries
-
   @@map("friendship")
-}
-
-enum FriendshipStatus {
-  PENDING
-  ACCEPTED
-  BLOCKED
 }
