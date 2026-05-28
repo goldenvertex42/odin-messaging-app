@@ -1,15 +1,17 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
-import passport from './config/passport.js'; 
-import { prisma } from "../../db/src/index.js";
-import authRouter from './routes/auth/auth.routes.js';
-import conversationsRouter from './routes/conversations/conversations.routes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+
+import passport from './config/passport.js'; 
+import { prisma } from "../../db/src/index.js";
+import authRouter from './routes/auth/auth.routes.js';
+import conversationsRouter from './routes/conversations/conversations.routes.js';
+import usersRouter from './routes/users/users.routes.js';
 
 import express from 'express';
 import cors from 'cors';
@@ -41,6 +43,7 @@ app.get('/api/test', (req, res) => {
 });
 app.use('/api/auth', authRouter);
 app.use('/api/conversations', conversationsRouter);
+app.use('/api/users', usersRouter);
 
 async function testDbConnection() {
   try {
