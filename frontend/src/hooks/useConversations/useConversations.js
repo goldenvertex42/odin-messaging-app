@@ -67,7 +67,7 @@ export function useConversations(getToken) {
         },
         body: JSON.stringify({
           isGroup,
-          usernames, // Backend maps these names to profile IDs inside its own strict transaction block
+          usernames,
           name: isGroup ? (groupName || `Group with ${usernames.slice(0, 2).join(', ')}...`) : null
         })
       });
@@ -88,6 +88,7 @@ export function useConversations(getToken) {
 
   return {
     conversations,
+    setConversations,
     loading,
     error,
     refreshConversations: fetchConversations,
