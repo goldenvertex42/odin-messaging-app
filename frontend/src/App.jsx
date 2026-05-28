@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router';
 import LoginPage from './pages/LoginPage/LoginPage';
 import RegisterPage from './pages/RegisterPage/RegisterPage';
-import ConversationsPage from './pages/ConversationPage/ConversationsPage';
+import ConversationsPage from './pages/ConversationsPage/ConversationsPage';
 import ProtectedRoute from './components/auth/ProtectedRoute/ProtectedRoute';
 import LoadingSpinner from './components/ui/LoadingSpinner/LoadingSpinner';
 import { useAuth } from './hooks/useAuth/useAuth';
