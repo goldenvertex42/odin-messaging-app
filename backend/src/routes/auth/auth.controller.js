@@ -96,6 +96,15 @@ export const loginUser = (req, res, next) => {
   }
 };
 
+export const logoutUser = (req, res, next) => {
+  req.logout((err) => {
+    if (err) {
+      return next(err);
+    }
+    res.redirect("/");
+  });
+}
+
 export const getMe = (req, res) => {
   // req.user is populated automatically by passport.authenticate('jwt', { session: false })
   // which you will run as a middleware on the route definition file itself.
