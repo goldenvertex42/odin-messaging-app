@@ -119,3 +119,35 @@ export const updateUserProfile = async (req, res) => {
     });
   }
 };
+
+export const getPendingFriendRequests = async (req, res) => {
+  try {
+    const currentUserId = req.user.id;
+
+    const pendingRequests = await prisma.friendship.findMany({
+      where: {
+        receiverId: currentUserId,
+        status: 'PENDING'
+      },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            username: true,
+            displayName: true,
+            avatarUrl: true,
+            bio: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    return res.status(200).json(pendingRequests);
+  } catch (error) {
+    console.error('Prisma pending requests retrieval fail:', error);
+    return res.status(500).json({ error: 'Failed to fetch incoming friend requests.' });
+  }
+};
