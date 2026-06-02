@@ -1,0 +1,90 @@
+.requestsSection {
+  width: 340px;
+  border-right: 1px solid var(--border-color);
+  padding: 24px;
+  overflow-y: auto;
+  background-color: var(--bg-workspace);
+}
+
+.requestsSection h3 {
+  font-size: 1.25rem;
+  color: var(--text-workspace);
+  margin-bottom: 16px;
+}
+
+.empty {
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 0.95rem;
+}
+
+.requestsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.requestCard {
+  background-color: var(--bg-sidebar);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.requestAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #ffffff;
+}
+
+.requestMeta {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+}
+
+.reqName {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.reqHandle {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.requestActions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.requestActions button {
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.requestActions button:hover {
+  opacity: 0.9;
+}
+
+.btnAccept {
+  background-color: var(--accent-color);
+  color: var(--bg-sidebar);
+}
+
+.btnDecline {
+  background-color: #ef4444;
+  color: #ffffff;
+}

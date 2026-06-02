@@ -1,0 +1,108 @@
+.searchHeader {
+  display: flex;
+  justify-content: space-between;
+  padding: 24px;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-workspace);
+  position: relative;
+  z-index: 10;
+}
+
+.searchInput {
+  width: 100%;
+  max-width: 600px;
+  padding: 12px 16px;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  background-color: var(--bg-workspace);
+  color: var(--text-workspace);
+  font-weight: 500;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.searchInput:focus {
+  border-color: var(--accent-color);
+}
+
+.suggestionsDropdown {
+  position: absolute;
+  top: calc(100% - 12px);
+  left: 24px;
+  width: calc(100% - 48px);
+  max-width: 600px;
+  background-color: var(--bg-sidebar);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.statusMsg, .noResultsMsg {
+  padding: 16px;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  font-style: italic;
+}
+
+.noResultsMsg {
+  color: #ef4444;
+}
+
+.suggestionRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.2s ease;
+}
+
+.suggestionRow:last-child {
+  border-bottom: none;
+}
+
+.suggestionRow:hover {
+  background-color: var(--btn-hover);
+}
+
+.suggestionRow img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: var(--bg-workspace);
+}
+
+.name {
+  display: block;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.handle {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.navLink {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 0.375rem;
+  font-family: sans-serif;
+  background-color: var(--btn-action-bg); 
+  color: var(--text-main); 
+  transition: background-color 0.2s;
+}
+
+.navLink:hover {
+  background-color: var(--btn-action-hover); 
+}

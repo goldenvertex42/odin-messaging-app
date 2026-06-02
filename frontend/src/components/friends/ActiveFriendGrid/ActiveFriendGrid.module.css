@@ -1,0 +1,62 @@
+.mainList {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.mainList h3 {
+  font-size: 1.5rem;
+  color: var(--text-workspace);
+  margin-bottom: 20px;
+}
+
+.empty {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.friendCard {
+  background-color: var(--bg-sidebar);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.friendCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-color: var(--accent-color);
+}
+
+.friendCard img {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  margin: 0 auto 12px auto;
+  background-color: var(--bg-workspace);
+  border: 2px solid var(--border-color);
+}
+
+.friendCard h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.friendCard p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}

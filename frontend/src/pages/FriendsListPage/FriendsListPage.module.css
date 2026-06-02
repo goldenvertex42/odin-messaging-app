@@ -1,0 +1,21 @@
+.friendsContainer {
+  flex: 1;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-workspace);
+  overflow: hidden;
+}
+
+.workspaceSplit {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.statusMsg {
+  padding: 16px;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  font-style: italic;
+}
