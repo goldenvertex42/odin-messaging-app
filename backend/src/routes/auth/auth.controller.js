@@ -105,12 +105,28 @@ export const logoutUser = (req, res, next) => {
   });
 }
 
-export const getMe = (req, res) => {
-  // req.user is populated automatically by passport.authenticate('jwt', { session: false })
-  // which you will run as a middleware on the route definition file itself.
+export const getMe = async (req, res) => {
   if (!req.user) {
     return res.status(401).json({ message: 'Unauthorized.' });
   }
   
-  return res.status(200).json(req.user);
+  try {
+    // Pull live values directly from database
+    const freshUser = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: {
+        id: true,
+        username: true,
+        displayName: true,
+        bio: true,
+        avatarUrl: true,
+        themePreference: true
+      }
+    });
+    
+    return res.status(200).json(freshUser);
+  } catch (error) {
+    return res.status(500).json({ error: 'Failed to synchronize live identity attributes.' });
+  }
 };
+
