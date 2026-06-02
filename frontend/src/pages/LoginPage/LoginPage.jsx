@@ -48,7 +48,6 @@ export default function LoginPage({ onAuthSuccess }) {
           <p className={styles.subtitle}>Sign in to join your Odin chat rooms</p>
         </div>
 
-        {/* Modular form injected here */}
         <LoginForm onSubmit={handleLoginSubmit} loading={loading} error={error} />
 
         <p className={styles.footerText}>
