@@ -1,47 +1,6 @@
 import { prisma } from '../../../../db/src/index.js';
 
 /**
- * 🎯 FETCH FRIENDS LIST
- * Queries friendships where user is either sender or receiver and status is ACCEPTED.
- */
-export const getFriendsList = async (req, res) => {
-  const currentUserId = req.user.id;
-
-  try {
-    const friendships = await prisma.friendship.findMany({
-      where: {
-        status: 'ACCEPTED',
-        OR: [
-          { senderId: currentUserId },
-          { receiverId: currentUserId }
-        ]
-      },
-      include: {
-        sender: {
-          select: { id: true, username: true, displayName: true, avatarUrl: true, isOnline: true }
-        },
-        receiver: {
-          select: { id: true, username: true, displayName: true, avatarUrl: true, isOnline: true }
-        }
-      }
-    });
-
-    // Strip out the logged-in user to return only the partner user profile payloads
-    const friends = friendships.map((bond) => {
-      return bond.senderId === currentUserId ? bond.receiver : bond.sender;
-    });
-
-    return res.status(200).json({
-      success: true,
-      data: friends
-    });
-  } catch (error) {
-    console.error('Friends list lookup failure:', error);
-    return res.status(500).json({ success: false, error: error.message });
-  }
-};
-
-/**
  * 🎯 FETCH USER PROFILE BY USERNAME
  * Used for public directory lookups when clicking on a user's avatar.
  */
@@ -117,37 +76,5 @@ export const updateUserProfile = async (req, res) => {
       success: false, 
       error: error.message || 'Failed to update user profile parameters.' 
     });
-  }
-};
-
-export const getPendingFriendRequests = async (req, res) => {
-  try {
-    const currentUserId = req.user.id;
-
-    const pendingRequests = await prisma.friendship.findMany({
-      where: {
-        receiverId: currentUserId,
-        status: 'PENDING'
-      },
-      include: {
-        sender: {
-          select: {
-            id: true,
-            username: true,
-            displayName: true,
-            avatarUrl: true,
-            bio: true
-          }
-        }
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    });
-
-    return res.status(200).json(pendingRequests);
-  } catch (error) {
-    console.error('Prisma pending requests retrieval fail:', error);
-    return res.status(500).json({ error: 'Failed to fetch incoming friend requests.' });
   }
 };

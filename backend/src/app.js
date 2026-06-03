@@ -11,7 +11,8 @@ import passport from './config/passport.js';
 import { prisma } from "../../db/src/index.js";
 import authRouter from './routes/auth/auth.routes.js';
 import conversationsRouter from './routes/conversations/conversations.routes.js';
-import usersRouter from './routes/users/users.routes.js';
+import friendsRouter from './routes/friends/friends.routes.js';
+import profileRouter from './routes/profile/profile.routes.js';
 
 import express from 'express';
 import cors from 'cors';
@@ -43,7 +44,8 @@ app.get('/api/test', (req, res) => {
 });
 app.use('/api/auth', authRouter);
 app.use('/api/conversations', conversationsRouter);
-app.use('/api/users', usersRouter);
+app.use('/api/friends', friendsRouter);
+app.use('/api/profile', profileRouter);
 
 async function testDbConnection() {
   try {
