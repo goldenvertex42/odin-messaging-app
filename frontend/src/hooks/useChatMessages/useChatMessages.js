@@ -15,7 +15,7 @@ export function useChatMessages(activeChat) {
     const fetchMessages = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/conversations/${activeChat.id}`, {
+        const response = await fetch(`/api/conversations/${activeChat.id}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -57,7 +57,7 @@ export function useChatMessages(activeChat) {
     setSending(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/conversations/${activeChat.id}/messages`, {
+      const response = await fetch(`/api/conversations/${activeChat.id}/messages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

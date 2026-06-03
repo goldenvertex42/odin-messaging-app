@@ -17,7 +17,7 @@ export function useConversations(getToken) {
       setLoading(true);
       setError(null);
       
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/conversations`, {
+      const response = await fetch(`/api/conversations`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -59,7 +59,7 @@ export function useConversations(getToken) {
     const isGroup = usernames.length > 1;
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/conversations`, {
+      const response = await fetch(`/api/conversations`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -68,7 +68,7 @@ export function useConversations(getToken) {
         body: JSON.stringify({
           isGroup,
           usernames,
-          name: isGroup ? (groupName || `Group with ${usernames.slice(0, 2).join(', ')}...`) : null
+          name: isGroup ? (groupName || `Group with ${usernames.slice(0, 2).join(', ')}...`) : `Chat with ${usernames[0]}`
         })
       });
 

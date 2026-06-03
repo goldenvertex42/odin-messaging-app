@@ -14,7 +14,7 @@ export function useFriendSearch(isOpen, usernameInput, participants = []) {
     const fetchFriendsList = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/users/friends`, {
+        const response = await fetch(`/api/users/friends`, {
           headers: { 
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
