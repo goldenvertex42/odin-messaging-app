@@ -6,42 +6,54 @@ import { useConversations } from '../../hooks/useConversations/useConversations'
 import styles from './ConversationsPage.module.css';
 
 export default function ConversationsPage({ user }) {
-  const effectiveCurrentUserId = user?.id;
-  const userProfile = user?.profile || {};
-  // Pull conversations matrix directly from your custom hook source
   const { conversations, setConversations, loading, error, createConversation } = useConversations();
   const [activeChat, setActiveChat] = useState(null);
+  const activeWorkspaceTheme = user?.themePreference || 'SLATE';
 
-  // 🎯 SYNCHRONIZER: Pushes the fresh message snippet into the sidebar state instantly
+  // Pushes the fresh message snippet into the sidebar state instantly
   const handleLocalSidebarUpdate = useCallback((conversationId, newRawMessage) => {
-    setConversations((prevConversations) => {
-      const hydratedMessage = {
-        ...newRawMessage,
-        sender: newRawMessage.sender || {
-          id: effectiveCurrentUserId,
-          username: 'you', 
-          displayName: 'You'
-        }
-      };
-      const updatedList = prevConversations.map((chat) => {
-        if (chat.id === conversationId) {
-          return {
-            ...chat,
-            // Prepend new messages so the preview algorithm sees index 0 instantly
-            messages: [hydratedMessage, ...(chat.messages || [])]
-          };
-        }
-        return chat;
-      });
+  setConversations((prevConversations) => {
+    // 1. Build a structurally complete message object to prevent bubble rendering crashes
+    const hydratedMessage = {
+      ...newRawMessage,
+      sender: newRawMessage.sender || { 
+        id: user.id, 
+        username: user.username, 
+        displayName: user.displayName || user.username 
+      }
+    };
 
-      // Maintain order sorting so the most recently updated thread jumps to the top
-      return [...updatedList].sort((a, b) => {
-        const timeA = new Date(a.messages?.[0]?.createdAt || a.updatedAt || 0).getTime();
-        const timeB = new Date(b.messages?.[0]?.createdAt || b.updatedAt || 0).getTime();
-        return timeB - timeA;
-      });
+    // 2. Map and append the message while maintaining your component's array expectations
+    const updatedList = prevConversations.map((chat) => {
+      if (chat.id === conversationId) {
+        return {
+          ...chat,
+          // Prepend for local preview logic, or append depending on your MessageList map direction
+          messages: [hydratedMessage, ...(chat.messages || [])]
+        };
+      }
+      return chat;
     });
-  }, [setConversations]);
+
+    // 3. Robust multi-criteria sorting that protects against array direction and missing records
+    return [...updatedList].sort((a, b) => {
+      // Extract timestamps safely from any position in the arrays
+      const timestampsA = [
+        new Date(a.updatedAt || 0).getTime(),
+        ...((a.messages || []).map(m => new Date(m.createdAt).getTime()))
+      ];
+      
+      const timestampsB = [
+        new Date(b.updatedAt || 0).getTime(),
+        ...((b.messages || []).map(m => new Date(m.createdAt).getTime()))
+      ];
+
+      // Sort by the absolute most recent event recorded for each conversation thread
+      return Math.max(...timestampsB) - Math.max(...timestampsA);
+    });
+  });
+}, [user]); // Dependency array fixed to track the active User context
+
 
   if (loading) {
     return (
@@ -50,21 +62,23 @@ export default function ConversationsPage({ user }) {
       </div>
     );
   }
-  const activeTheme = userProfile?.themePreference || "SLATE";
+
+  const liveActiveChat = conversations.find(c => c.id === activeChat?.id) || activeChat;
+
   return (
-    <div className={styles.workspace} data-theme={activeTheme} data-testid="conversations-page-container">
+    <div className={styles.workspace} data-theme={activeWorkspaceTheme} data-testid="conversations-page-container">
       <Sidebar 
         conversations={conversations} // Passed down as shared state mapping
         activeChatId={activeChat?.id}
-        currentUserId={effectiveCurrentUserId}
+        currentUserId={user?.id}
         onSelectChat={setActiveChat}
         onCreateConversation={createConversation}
       />
       
       {activeChat ? (
         <ChatWindow 
-          activeChat={activeChat}
-          currentUserId={effectiveCurrentUserId}
+          activeChat={liveActiveChat}
+          currentUserId={user?.id}
           onNewMessageSent={(msg) => handleLocalSidebarUpdate(activeChat.id, msg)}
         />
       ) : (
