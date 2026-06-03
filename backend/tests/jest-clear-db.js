@@ -1,4 +1,4 @@
-import { prisma } from '../db/src/index.js';
+import { prisma } from '../../db/src/index.js';
 
 export const clearDatabase = async () => {
   // Must clear tables in reverse order of foreign key relationships 
