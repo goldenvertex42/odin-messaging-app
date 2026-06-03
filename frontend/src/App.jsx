@@ -2,39 +2,47 @@ import { Routes, Route, Navigate } from 'react-router';
 import LoginPage from './pages/LoginPage/LoginPage';
 import RegisterPage from './pages/RegisterPage/RegisterPage';
 import ConversationsPage from './pages/ConversationsPage/ConversationsPage';
+import ProfilePage from './pages/ProfilePage/ProfilePage';
+import FriendsListPage from './pages/FriendsListPage/FriendsListPage';
 import ProtectedRoute from './components/auth/ProtectedRoute/ProtectedRoute';
 import LoadingSpinner from './components/ui/LoadingSpinner/LoadingSpinner';
 import { useAuth } from './hooks/useAuth/useAuth';
 import './App.css';
 
 export default function App() {
-  const { user, loading, login } = useAuth();
+  const { user, loading, login, updateUserTheme } = useAuth(); // Assume update handler is exposed or managed via local context
 
-  // One line, completely clean, self-contained loading state
   if (loading) return <LoadingSpinner />;
 
+  // Broaden the theme presence across the active workspace matrix
+  const currentAppTheme = user?.themePreference || 'SLATE';
+
   return (
-    <Routes>
-      <Route 
-        path="/login" 
-        element={user ? <Navigate to="/conversations" replace /> : <LoginPage onAuthSuccess={login} />} 
-      />
-      <Route 
-        path="/register" 
-        element={user ? <Navigate to="/conversations" replace /> : <RegisterPage onAuthSuccess={login} />} 
-      />
-      <Route 
-        path="/conversations" 
-        element={
-          <ProtectedRoute user={user} loading={loading}>
-            <ConversationsPage user={user} />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="*" 
-        element={<Navigate to={user ? "/conversations" : "/login"} replace />} 
-      />
-    </Routes>
+    <div className="app-viewport-root" data-theme={currentAppTheme}>
+      <Routes>
+        <Route path="/login" element={user ? <Navigate to="/conversations" replace /> : <LoginPage onAuthSuccess={login} />} />
+        <Route path="/register" element={user ? <Navigate to="/conversations" replace /> : <RegisterPage onAuthSuccess={login} />} />
+        
+        <Route element={<ProtectedRoute user={user} loading={loading} />}>
+          
+          <Route path="/conversations">
+            {/* Handles: /conversations/:activeConversationId (Highest Precedence) */}
+            <Route path=":activeConversationId" element={<ConversationsPage user={user} />} />
+            {/* Handles the base path: /conversations (Index Fallback) */}
+            <Route index element={<ConversationsPage user={user} />} />
+          </Route>
+          
+          <Route path="/profile" element={<ProfilePage currentUser={user} onGlobalThemeChange={updateUserTheme} />} />
+          
+          <Route path="/profile/:username" element={<ProfilePage currentUser={user} onGlobalThemeChange={updateUserTheme} />} />
+          
+          <Route path="/friends" element={<FriendsListPage />} />
+          
+        </Route>
+
+        {/* Catch-All Fallback Rule */}
+        <Route path="*" element={<Navigate to={user ? "/conversations" : "/login"} replace />} />
+      </Routes>
+    </div>
   );
 }
