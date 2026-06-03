@@ -67,43 +67,75 @@ export const registerUser = async (req, res, next) => {
   }
 };
 
-export const loginUser = (req, res, next) => {
+export const loginUser = async (req, res, next) => {
   try {
     // Passport's middleware successfully completed, so req.user is ready!
     const user = req.user;
 
-    // Clean up sensitive table maps before sending to your React client
+    // 1. Mutate database state to declare active network presence
+    const updatedUser = await prisma.user.update({
+      where: { id: user.id },
+      data: { isOnline: true }
+    });
+
+    // 2. Map structural values cleanly using the freshly updated model row
     const safeUser = {
-      id: user.id,
-      email: user.email,
-      username: user.username,
-      displayName: user.displayName,
-      avatarUrl: user.avatarUrl,
-      bio: user.bio,
-      isOnline: user.isOnline
+      id: updatedUser.id,
+      email: updatedUser.email,
+      username: updatedUser.username,
+      displayName: updatedUser.displayName,
+      avatarUrl: updatedUser.avatarUrl,
+      bio: updatedUser.bio,
+      isOnline: updatedUser.isOnline,
+      themePreference: updatedUser.themePreference
     };
 
     // Issue the stateless web token
-    const token = generateToken(user.id);
+    const token = generateToken(updatedUser.id);
 
-    return res.status(200).json({
-      message: 'Logged in successfully.',
-      token,
-      user: safeUser
+    return res.status(200).json({ 
+      message: 'Logged in successfully.', 
+      token, 
+      user: safeUser 
     });
   } catch (error) {
     return next(error);
   }
 };
 
-export const logoutUser = (req, res, next) => {
-  req.logout((err) => {
-    if (err) {
-      return next(err);
+export const logoutUser = async (req, res, next) => {
+  try {
+    // Capture tracking context identity before Passport clears the request session context
+    const currentUserId = req.user?.id;
+
+    if (!currentUserId) {
+      return res.status(401).json({ success: false, error: 'Unauthorized payload exception.' });
     }
-    res.redirect("/");
-  });
-}
+
+    if (currentUserId) {
+      // 1. Flip presence toggle state back to offline
+      await prisma.user.update({
+        where: { id: currentUserId },
+        data: { isOnline: false }
+      });
+    }
+
+    // 2. Clear Passport session tracking records cleanly
+    req.logout((err) => {
+      if (err) {
+        return next(err);
+      }
+      
+      // 3. Return a clean JSON status instead of res.redirect
+      return res.status(200).json({ 
+        success: true, 
+        message: "Logged out successfully." 
+      });
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
 
 export const getMe = async (req, res) => {
   if (!req.user) {
