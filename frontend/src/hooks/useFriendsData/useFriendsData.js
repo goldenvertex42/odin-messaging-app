@@ -11,8 +11,8 @@ export default function useFriendsData() {
     setLoading(true);
 
     Promise.all([
-      fetch('/api/users/friends', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
-      fetch('/api/users/friends/requests', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.ok ? res.json() : [])
+      fetch('/api/friends', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
+      fetch('/api/friends/requests', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.ok ? res.json() : [])
     ])
       .then(([friendsData, requestsData]) => {
         // Extract array if nested, or fall back safely to an empty array
@@ -38,7 +38,7 @@ export default function useFriendsData() {
 
   const processRequest = useCallback(async (requestId, targetFriend, actionType) => {
     try {
-      const res = await fetch(`/api/users/friends/requests/${requestId}`, {
+      const res = await fetch(`/api/friends/requests/${requestId}`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
