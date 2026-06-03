@@ -1,4 +1,3 @@
-import React from 'react';
 import useFriendsData from '../../hooks/useFriendsData/useFriendsData';
 import FriendSearch from '../../components/friends/FriendSearch/FriendSearch';
 import PendingRequests from '../../components/friends/PendingRequests/PendingRequests';

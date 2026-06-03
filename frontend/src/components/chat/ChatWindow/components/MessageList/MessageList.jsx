@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import MessageBubble from '../MessageBubble/MessageBubble';
 import styles from './MessageList.module.css';
 
