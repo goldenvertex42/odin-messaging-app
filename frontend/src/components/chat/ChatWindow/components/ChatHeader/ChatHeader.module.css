@@ -1,12 +1,35 @@
 .header {
-  padding: 1.25rem;
-  background-color: var(--bg-sidebar); 
-  border-bottom: 1px solid var(--border-color); 
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-workspace, #e0e0e0);
 }
 
-.header h4 {
-  margin: 0;
-  font-size: 1.125rem;
-  color: var(--text-main); 
-  font-family: sans-serif;
+.titleContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
+
+.titleContainer h4 {
+  margin: 0;
+  color: var(--text-workspace);
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  transition: background-color 0.2s ease;
+}
+
+.online {
+  background-color: var(--color-emerald, #10b981);
+  box-shadow: 0 0 8px var(--color-emerald, #10b981);
+}
+
+.offline {
+  background-color: #9ca3af; /* Clean, neutral gray */
+}
+

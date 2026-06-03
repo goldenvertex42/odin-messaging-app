@@ -2,17 +2,14 @@ import { useChatMessages } from '../../../hooks/useChatMessages/useChatMessages'
 import ChatHeader from './components/ChatHeader/ChatHeader';
 import MessageList from './components/MessageList/MessageList';
 import MessageInput from './components/MessageInput/MessageInput';
+import { getConversationName } from '../../../utils/getConversationName';
 import styles from './ChatWindow.module.css';
 
 export default function ChatWindow({ activeChat, currentUserId, onNewMessageSent }) {
   const { messages, sending, sendMessage } = useChatMessages(activeChat);
 
-  // 🎯 INTERCEPTOR: Fires when the user hits send inside the MessageInput component
   const handleInterceptSendMessage = async (textContent) => {
-    // 1. Fire your hook logic and capture the returned JSON object row from the backend
     const newlyCreatedMessage = await sendMessage(textContent);
-
-    // 2. Forward that fresh data object up to the parent ConversationsPage layout
     if (onNewMessageSent && newlyCreatedMessage) {
       onNewMessageSent(newlyCreatedMessage);
     }
@@ -26,21 +23,34 @@ export default function ChatWindow({ activeChat, currentUserId, onNewMessageSent
     );
   }
 
+  // 2. Dynamically resolve the correct title text string
+  const resolvedChatTitle = getConversationName(activeChat, currentUserId);
+
+  // 1. Find the parent participant record row object
+  const companionRecord = !activeChat.isGroup 
+    ? activeChat.participants?.find(p => p.userId !== currentUserId)
+    : null;
+
+  // 2. Extract the nested user profile object explicitly from that record
+  const partnerUser = companionRecord?.user || null;
+
+  // 3. Extract the explicit boolean state safely, forcing a strict boolean evaluate
+  const isPartnerOnline = partnerUser ? partnerUser.isOnline === true : false;
+
+  console.log("DEBUG PRESENCE MATRIX:", {
+    chatName: activeChat.name,
+    rawParticipantsArray: activeChat.participants,
+    isolatedPartnerObject: partnerUser,
+    finalEvaluatedFlag: isPartnerOnline
+  });
+
   return (
     <section className={styles.window} data-testid="chat-window-container">
-      <ChatHeader title={activeChat.name} />
+      {/* 3. Pass the resolved title here instead of activeChat.name */}
+      <ChatHeader title={resolvedChatTitle} isOnline={isPartnerOnline} isGroup={activeChat.isGroup} /> 
       
-      <MessageList 
-        messages={messages} 
-        currentUserId={currentUserId} 
-        isGroup={activeChat.isGroup} 
-      />
-      
-      {/* ✅ Pass your interceptor down instead of the raw isolated hook handler */}
-      <MessageInput 
-        onSendMessage={handleInterceptSendMessage} 
-        disabled={sending} 
-      />
+      <MessageList messages={messages} currentUserId={currentUserId} isGroup={activeChat.isGroup} />
+      <MessageInput onSendMessage={handleInterceptSendMessage} disabled={sending} />
     </section>
   );
 }
