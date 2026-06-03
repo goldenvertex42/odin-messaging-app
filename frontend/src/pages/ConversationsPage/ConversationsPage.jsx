@@ -1,4 +1,5 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router';
 import Sidebar from '../../components/chat/Sidebar/Sidebar';
 import ChatWindow from '../../components/chat/ChatWindow/ChatWindow';
 import LoadingSpinner from '../../components/ui/LoadingSpinner/LoadingSpinner';
@@ -8,6 +9,20 @@ import styles from './ConversationsPage.module.css';
 export default function ConversationsPage({ user }) {
   const { conversations, setConversations, loading, error, createConversation } = useConversations();
   const [activeChat, setActiveChat] = useState(null);
+
+  const params = useParams();
+  const activeConversationId = params?.activeConversationId;
+
+  // 2. Keep your hook data synchronization loop active
+  useEffect(() => {
+    if (activeConversationId && conversations.length > 0) {
+      const matchedChat = conversations.find(c => c.id === activeConversationId);
+      if (matchedChat) {
+        setActiveChat(matchedChat);
+      }
+    }
+  }, [activeConversationId, conversations]);
+
   const activeWorkspaceTheme = user?.themePreference || 'SLATE';
 
   // Pushes the fresh message snippet into the sidebar state instantly
@@ -64,6 +79,7 @@ export default function ConversationsPage({ user }) {
   }
 
   const liveActiveChat = conversations.find(c => c.id === activeChat?.id) || activeChat;
+  const shouldRenderChatWindow = !!liveActiveChat || !!activeConversationId;
 
   return (
     <div className={styles.workspace} data-theme={activeWorkspaceTheme} data-testid="conversations-page-container">
@@ -75,7 +91,7 @@ export default function ConversationsPage({ user }) {
         onCreateConversation={createConversation}
       />
       
-      {activeChat ? (
+      {shouldRenderChatWindow ? (
         <ChatWindow 
           activeChat={liveActiveChat}
           currentUserId={user?.id}
