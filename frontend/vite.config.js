@@ -8,6 +8,14 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+    resolve: {
+      // 🎯 FORCE VITE TO DEDUPLICATE THE COMPILER: Prevents dual-instance context creation
+      dedupe: ['react-router'], 
+    },
+    optimizeDeps: {
+      // Pre-bundle react-router instantly into a single global memory layer
+      include: ['react-router'], 
+    },
     server: {
       proxy: {
         '/api': {
