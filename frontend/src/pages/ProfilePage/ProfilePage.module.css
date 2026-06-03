@@ -1,0 +1,84 @@
+.container {
+  flex: 1;
+  height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-workspace);
+  padding: 32px;
+  overflow: hidden;
+}
+
+.card {
+  width: 100%;
+  max-width: 520px;
+  background-color: var(--bg-sidebar); /* Matches high-contrast dark accent base panels */
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  transition: border-color 0.25s ease;
+}
+
+.avatar {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background-color: var(--bg-workspace);
+  border: 3px solid var(--border-color);
+  margin-bottom: 24px;
+  object-fit: cover;
+}
+
+.infoBlock {
+  width: 100%;
+  margin-bottom: 28px;
+}
+
+.loading {
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 1.1rem;
+}
+
+/* ==========================================================================
+   SHARED REUSABLE ACTIONS BUTTON MATRIX (Exposed via fallback cascades)
+   ========================================================================== */
+.actions {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 1rem;
+}
+
+.actions button {
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.actions button:hover {
+  opacity: 0.9;
+}
+
+.btnEdit, .btnSave, .btnMessage {
+  background-color: var(--accent-color);
+  color: var(--bg-sidebar); /* Sharp inversion for readability contrast */
+}
+
+.btnCancel {
+  background-color: var(--btn-action-bg);
+  color: var(--text-main);
+}
+
+.btnCancel:hover {
+  background-color: var(--btn-action-hover);
+}

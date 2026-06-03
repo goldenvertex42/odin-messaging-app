@@ -1,0 +1,45 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.form input,
+.form textarea,
+.form select {
+  width: 100%;
+  padding: 10px 14px;
+  background-color: #ffffff;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-workspace); /* Read parameters safely for focus legibility */
+  font-weight: 500;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form input:focus,
+.form textarea:focus,
+.form select:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+}
+
+.form select option {
+  background-color: #ffffff;
+  color: var(--text-workspace);
+}
+
+.form textarea {
+  min-height: 100px;
+  resize: vertical; /* Safe parameter control for text wrapping fields */
+}
