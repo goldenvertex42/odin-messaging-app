@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { Link } from 'react-router';
 import LoadingSpinner from '../../ui/LoadingSpinner/LoadingSpinner';
 import NewChatButton from './components/NewChatButton/NewChatButton';
+import { useAuth } from '../../../hooks/useAuth/useAuth';
 import styles from './Sidebar.module.css';
 
 const getConversationTitle = (chat, currentUserId) => {
@@ -19,29 +20,18 @@ const getPreviewText = (chat, currentUserId) => {
   const messages = chat.messages || [];
   if (messages.length === 0) return 'No messages yet';
 
-  // Since our backend query sorts messages via { createdAt: 'desc' }, 
-  // index 0 is structurally guaranteed to be the newest message.
-  let latestMessage = messages[0];
-
-  // 🎯 DEFENSIVE SEED-DATA SAFEGUARD: If multiple messages share the exact same 
-  // millisecond timestamp from our SQL script, find the one that isn't empty 
-  // or use the array sequence to preserve true order.
-  if (messages.length > 1) {
-    const timeZero = new Date(messages[0].createdAt).getTime();
-    const timeOne = new Date(messages[1].createdAt).getTime();
-    
-    if (timeZero === timeOne) {
-      // If timestamps collapse due to seeding speeds, fall back safely to 
-      // array chronological mapping or look for specific test strings
-      latestMessage = messages[messages.length - 1]; 
-    }
-  }
+  // extract the latest message by sorting based on createdAt timestamps, with a fallback to the first message
+  const latestMessage = [...messages].sort((a, b) => {
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  })[0] || messages[0];
 
   if (!latestMessage) return 'No messages yet';
 
-  const senderName = latestMessage.sender?.id === currentUserId ? 'You' : latestMessage.sender?.username;
+  // Normalize ID checking using your structural profile parameters
+  const isMe = latestMessage.sender?.id?.toString() === currentUserId?.toString();
+  const senderName = isMe ? 'You' : (latestMessage.sender?.username || 'User');
+  
   const prefix = (chat.isGroup && senderName) ? `${senderName}: ` : '';
-
   return `${prefix}${latestMessage.content || 'Shared an attachment'}`;
 };
 
@@ -85,9 +75,17 @@ function ConversationList({ conversations, activeChatId, currentUserId, onSelect
 }
 
 function SidebarFooter() {
+  const { logout } = useAuth();
+
   return (
     <div className={styles.footer}>
-      <Link to="/logout" className={styles.logoutBtn}>Logout</Link>
+      <div className={styles.profileActions}>
+        <Link to="/friends" className={styles.footerLink}>👥 Friends</Link>
+        <Link to="/profile" className={styles.footerLink}>👤 Profile</Link>
+      </div>
+      <Link to="/logout" className={styles.logoutBtn} onClick={logout}>
+        Logout
+      </Link>
     </div>
   );
 }
