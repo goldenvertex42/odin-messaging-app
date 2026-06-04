@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router';
-import styles from './ActiveFriendGrid.module.css';
+import styles from './ActiveFriendsGrid.module.css';
 
 export default function ActiveFriendsGrid({ friends }) {
   const navigate = useNavigate();
