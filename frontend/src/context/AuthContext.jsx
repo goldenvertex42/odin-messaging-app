@@ -7,11 +7,36 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedSession = localStorage.getItem('user_session');
-    if (savedSession) {
-      setUser(JSON.parse(savedSession));
-    }
-    setLoading(false);
+    const validateSession = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const response = await fetch('/api/auth/me', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          if (response.ok) {
+            const userData = await response.json();
+            setUser(userData);
+            localStorage.setItem('user_session', JSON.stringify(userData));
+          } else {
+            // Token is invalid, clear local storage
+            localStorage.removeItem('token');
+            localStorage.removeItem('user_session');
+          }
+        } catch (err) {
+          console.error('Token validation failed:', err);
+          // Clear local storage on error
+          localStorage.removeItem('token');
+          localStorage.removeItem('user_session');
+        }
+      }
+      setLoading(false);
+    };
+    validateSession();
   }, []);
 
   const login = (userData, token) => {
