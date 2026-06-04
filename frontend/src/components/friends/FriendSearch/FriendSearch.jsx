@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router';
 import styles from './FriendSearch.module.css';
 
-export default function FriendsSearch() {
+export default function FriendSearch() {
   const navigate = useNavigate();
   const [searchInput, setSearchInput] = useState('');
   const [searchResults, setSearchResults] = useState([]);
