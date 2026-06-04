@@ -1,7 +1,7 @@
 import useFriendsData from '../../hooks/useFriendsData/useFriendsData';
 import FriendSearch from '../../components/friends/FriendSearch/FriendSearch';
 import PendingRequests from '../../components/friends/PendingRequests/PendingRequests';
-import ActiveFriendGrid from '../../components/friends/ActiveFriendGrid/ActiveFriendGrid';
+import ActiveFriendsGrid from '../../components/friends/ActiveFriendsGrid/ActiveFriendsGrid';
 import styles from './FriendsListPage.module.css';
 
 export default function FriendsListPage() {
@@ -15,7 +15,7 @@ export default function FriendsListPage() {
       
       <div className={styles.workspaceSplit}>
         <PendingRequests requests={requests} onDecision={processRequest} />
-        <ActiveFriendGrid friends={friends} />
+        <ActiveFriendsGrid friends={friends} />
       </div>
     </div>
   );
