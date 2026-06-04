@@ -10,11 +10,10 @@ import { useAuth } from './hooks/useAuth/useAuth';
 import './App.css';
 
 export default function App() {
-  const { user, loading, login, updateUserTheme } = useAuth(); // Assume update handler is exposed or managed via local context
+  const { user, loading, login, updateUserTheme } = useAuth();
 
   if (loading) return <LoadingSpinner />;
 
-  // Broaden the theme presence across the active workspace matrix
   const currentAppTheme = user?.themePreference || 'SLATE';
 
   return (
@@ -26,9 +25,7 @@ export default function App() {
         <Route element={<ProtectedRoute user={user} loading={loading} />}>
           
           <Route path="/conversations">
-            {/* Handles: /conversations/:activeConversationId (Highest Precedence) */}
             <Route path=":activeConversationId" element={<ConversationsPage user={user} />} />
-            {/* Handles the base path: /conversations (Index Fallback) */}
             <Route index element={<ConversationsPage user={user} />} />
           </Route>
           
@@ -40,7 +37,6 @@ export default function App() {
           
         </Route>
 
-        {/* Catch-All Fallback Rule */}
         <Route path="*" element={<Navigate to={user ? "/conversations" : "/login"} replace />} />
       </Routes>
     </div>
