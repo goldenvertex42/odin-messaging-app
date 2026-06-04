@@ -8,35 +8,38 @@ export default function ProfileEditForm({ formData, onChange, onSave, onCancel }
     onChange({ ...formData, [field]: value });
   };
 
-  return (
-    <div className={styles.form}>
-      <label>Display Name</label>
+  return ( 
+    <div className={styles.form}> 
+      <label htmlFor="edit-display-name">Display Name</label> 
       <input 
+        id="edit-display-name"
         type="text" 
         value={formData.displayName} 
         onChange={(e) => setField('displayName', e.target.value)} 
-      />
-      
-      <label>Bio</label>
+      /> 
+
+      <label htmlFor="edit-bio">Bio</label> 
       <textarea 
+        id="edit-bio"
         value={formData.bio} 
         onChange={(e) => setField('bio', e.target.value)} 
-      />
-      
-      <label>Theme Preference</label>
-      <select 
-        value={formData.themePreference} 
-        onChange={(e) => setField('themePreference', e.target.value)}
-      >
-        {AVAILABLE_THEMES.map((theme) => (
-          <option key={theme} value={theme}>{theme}</option>
-        ))}
-      </select>
+      /> 
 
-      <div className={parentStyles.actions}>
-        <button onClick={onSave} className={parentStyles.btnSave}>Save</button>
-        <button onClick={onCancel} className={parentStyles.btnCancel}>Cancel</button>
-      </div>
-    </div>
-  );
+      <label htmlFor="edit-theme">Theme Preference</label> 
+      <select 
+        id="edit-theme"
+        value={formData.themePreference} 
+        onChange={(e) => setField('themePreference', e.target.value)} 
+      > 
+        {AVAILABLE_THEMES.map((theme) => ( 
+          <option key={theme} value={theme}>{theme}</option> 
+        ))} 
+      </select> 
+
+      <div className={parentStyles.actions}> 
+        <button onClick={onSave} className={parentStyles.btnSave}>Save</button> 
+        <button onClick={onCancel} className={parentStyles.btnCancel}>Cancel</button> 
+      </div> 
+    </div> 
+  ); 
 }
