@@ -6,7 +6,7 @@ import ProfilePage from './pages/ProfilePage/ProfilePage';
 import FriendsListPage from './pages/FriendsListPage/FriendsListPage';
 import ProtectedRoute from './components/auth/ProtectedRoute/ProtectedRoute';
 import LoadingSpinner from './components/ui/LoadingSpinner/LoadingSpinner';
-import { useAuth } from './hooks/useAuth/useAuth';
+import { useAuth } from './context/AuthContext';
 import './App.css';
 
 export default function App() {

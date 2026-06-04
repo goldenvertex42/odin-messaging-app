@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { Link } from 'react-router';
 import LoadingSpinner from '../../ui/LoadingSpinner/LoadingSpinner';
 import NewChatButton from './components/NewChatButton/NewChatButton';
-import { useAuth } from '../../../hooks/useAuth/useAuth';
+import { useAuth } from '../../../context/AuthContext';
 import styles from './Sidebar.module.css';
 
 const getConversationTitle = (chat, currentUserId) => {
