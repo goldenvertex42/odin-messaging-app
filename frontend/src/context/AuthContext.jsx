@@ -18,30 +18,26 @@ export const AuthProvider = ({ children }) => {
               'Authorization': `Bearer ${token}`
             }
           });
+
           if (response.ok) {
             const userData = await response.json();
-            setUser(userData);
-            localStorage.setItem('user_session', JSON.stringify(userData));
+            setUser(userData); // getMe returns flat user object
           } else {
-            // Token is invalid, clear local storage
             localStorage.removeItem('token');
-            localStorage.removeItem('user_session');
           }
         } catch (err) {
           console.error('Token validation failed:', err);
-          // Clear local storage on error
           localStorage.removeItem('token');
-          localStorage.removeItem('user_session');
         }
       }
       setLoading(false);
     };
+
     validateSession();
   }, []);
 
   const login = (userData, token) => {
     localStorage.setItem('token', token);
-    localStorage.setItem('user_session', JSON.stringify(userData));
     setUser(userData);
   };
 
@@ -59,7 +55,6 @@ export const AuthProvider = ({ children }) => {
       console.error('Logout request failed:', err);
     } finally {
       localStorage.removeItem('token');
-      localStorage.removeItem('user_session');
       setUser(null);
     }
   };
@@ -70,7 +65,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={{ user, loading, login, logout, updateUserTheme }}>
-      {children}
+      {!loading && children}
     </AuthContext.Provider>
   );
 };
