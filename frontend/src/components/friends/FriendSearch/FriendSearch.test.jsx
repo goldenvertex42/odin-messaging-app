@@ -1,9 +1,11 @@
-import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { describe, test, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
+import * as searchHookModule from '../../../hooks/useUserSearch/useUserSearch';
 import FriendSearch from './FriendSearch';
 
+// Mock react-router's navigate function cleanly
 const mockNavigate = vi.fn();
 vi.mock('react-router', async (importOriginal) => {
   const actual = await importOriginal();
@@ -13,21 +15,7 @@ vi.mock('react-router', async (importOriginal) => {
   };
 });
 
-vi.mock('lodash', () => ({
-  default: {
-    debounce: (fn) => {
-      const flusher = (...args) => fn(...args);
-      flusher.cancel = vi.fn();
-      return flusher;
-    }
-  }
-}));
-
-const nativeTimeout = window.setTimeout;
-const mockTimeout = (callback, ms) => {
-  return nativeTimeout(callback, ms === 300 ? 0 : ms);
-};
-
+// Mock CSS Modules to isolate presentational class binders
 vi.mock('./FriendSearch.module.css', () => ({
   default: {
     searchHeader: 'mock-search-header',
@@ -42,32 +30,37 @@ vi.mock('./FriendSearch.module.css', () => ({
   },
 }));
 
-describe('FriendSearch Asynchronous Clean Real-Timer Suite', () => {
+describe('FriendSearch Hook-Driven Component Layout Suite', () => {
   beforeEach(() => {
-    vi.stubGlobal('fetch', vi.fn());
-    window.setTimeout = mockTimeout;
-    localStorage.setItem('token', 'mock-valid-jwt');
+    vi.restoreAllMocks();
     mockNavigate.mockClear();
   });
 
-  afterEach(() => {
-    window.setTimeout = nativeTimeout;
-    vi.restoreAllMocks();
-    localStorage.clear();
-  });
-
   test('renders initial input state cleanly with no dropdown visibility', () => {
-    render(
+    // Inject custom mock behavior matching empty hook initialization values
+    vi.spyOn(searchHookModule, 'useUserSearch').mockReturnValue({
+      suggestions: [],
+      isSearching: false
+    });
+
+    const { container } = render(
       <MemoryRouter>
         <FriendSearch />
       </MemoryRouter>
     );
 
     expect(screen.getByPlaceholderText(/search global users by username\.\.\./i)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /back to home/i })).toBeInTheDocument();
+    
+    const dropdownEl = container.querySelector('.mock-dropdown');
+    expect(dropdownEl).not.toBeInTheDocument();
   });
 
-  test('displays searching loader status text while debounce timer evaluates', async () => {
-    fetch.mockReturnValueOnce(new Promise(() => {}));
+  test('displays searching status message text while the hook executes a network check', () => {
+    vi.spyOn(searchHookModule, 'useUserSearch').mockReturnValue({
+      suggestions: [],
+      isSearching: true
+    });
 
     render(
       <MemoryRouter>
@@ -79,12 +72,18 @@ describe('FriendSearch Asynchronous Clean Real-Timer Suite', () => {
     fireEvent.change(inputEl, { target: { value: 'zeus' } });
 
     expect(screen.getByText('Searching...')).toBeInTheDocument();
+    expect(screen.queryByText('No results - User does not exist')).not.toBeInTheDocument();
   });
 
-  test('renders matching profile result row after debounce timeout resolves successfully', async () => {
-    fetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ id: 'u_9', username: 'zeus_sky', displayName: 'Zeus Bolt' }),
+  test('renders multiple matching profile suggestion rows returned by the hook', () => {
+    const mockSuggestions = [
+      { id: 'u1', username: 'alice_dev', displayName: 'Alice Builder', avatarUrl: 'a.png' },
+      { id: 'u2', username: 'alex_code', displayName: '', avatarUrl: 'b.png' }
+    ];
+
+    vi.spyOn(searchHookModule, 'useUserSearch').mockReturnValue({
+      suggestions: mockSuggestions,
+      isSearching: false
     });
 
     render(
@@ -94,16 +93,23 @@ describe('FriendSearch Asynchronous Clean Real-Timer Suite', () => {
     );
 
     const inputEl = screen.getByPlaceholderText(/search global users by username\.\.\./i);
-    fireEvent.change(inputEl, { target: { value: 'zeus' } });
+    fireEvent.change(inputEl, { target: { value: 'al' } });
 
-    const handleText = await screen.findByText('@zeus_sky');
-    expect(handleText).toBeInTheDocument();
-    expect(screen.getByText('Zeus Bolt')).toBeInTheDocument();
-    expect(fetch).toHaveBeenCalledWith('/api/users/profile/zeus', expect.any(Object));
+    // Verify row 1 captures display name preference
+    expect(screen.getByText('Alice Builder')).toBeInTheDocument();
+    expect(screen.getByText('@alice_dev')).toBeInTheDocument();
+
+    // Verify row 2 falls back gracefully to standard username formatting rules
+    expect(screen.getByText('alex_code')).toBeInTheDocument();
+    expect(screen.getByText('@alex_code')).toBeInTheDocument();
+    expect(screen.queryByText('Searching...')).not.toBeInTheDocument();
   });
 
-  test('asserts exact explicit string text fallback warning alert if network fetch fails', async () => {
-    fetch.mockResolvedValueOnce({ ok: false, status: 404 });
+  test('asserts exact explicit requirement text fallback warning alert if search queries yield empty outputs', () => {
+    vi.spyOn(searchHookModule, 'useUserSearch').mockReturnValue({
+      suggestions: [],
+      isSearching: false
+    });
 
     render(
       <MemoryRouter>
@@ -114,17 +120,17 @@ describe('FriendSearch Asynchronous Clean Real-Timer Suite', () => {
     const inputEl = screen.getByPlaceholderText(/search global users by username\.\.\./i);
     fireEvent.change(inputEl, { target: { value: 'ghost_user' } });
 
-    const errorAlert = await screen.findByText('No results - User does not exist');
-    expect(errorAlert).toBeInTheDocument();
+    expect(screen.getByText('No results - User does not exist')).toBeInTheDocument();
     expect(screen.queryByText('Searching...')).not.toBeInTheDocument();
   });
 
-  test('dispatches history redirections cleanly when user clicks a matching returned row node', async () => {
+  test('dispatches standard profile history redirections cleanly when clicking a suggestion node row', async () => {
     const user = userEvent.setup();
-    
-    fetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ id: 'u_9', username: 'zeus_sky', displayName: 'Zeus Bolt' }),
+    const mockSuggestions = [{ id: 'u1', username: 'zeus_sky', displayName: 'Zeus' }];
+
+    vi.spyOn(searchHookModule, 'useUserSearch').mockReturnValue({
+      suggestions: mockSuggestions,
+      isSearching: false
     });
 
     render(
@@ -136,9 +142,10 @@ describe('FriendSearch Asynchronous Clean Real-Timer Suite', () => {
     const inputEl = screen.getByPlaceholderText(/search global users by username\.\.\./i);
     fireEvent.change(inputEl, { target: { value: 'zeus' } });
 
-    const targetRow = await screen.findByText('@zeus_sky');
+    const targetRow = screen.getByText('@zeus_sky');
     await user.click(targetRow);
 
+    expect(mockNavigate).toHaveBeenCalledTimes(1);
     expect(mockNavigate).toHaveBeenCalledWith('/profile/zeus_sky');
   });
 });
