@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
-export function useChatMessages(activeChat) {
+export function useChatMessages(activeChat, onNewMessageSent) {
   const [messages, setMessages] = useState([]);
   const [sending, setSending] = useState(false);
 
@@ -52,37 +52,51 @@ export function useChatMessages(activeChat) {
     };
   }, [activeChat]);
 
-  const sendMessage = useCallback(async (textContent) => {
+  const sendMessage = useCallback(async (textContent, fileAttachment = null) => {
     if (!activeChat) return;
     setSending(true);
+    
     try {
       const token = localStorage.getItem('token');
+      
+      const formData = new FormData();
+      
+      if (textContent && textContent.trim() !== '') {
+        formData.append('content', textContent);
+      }
+      
+      if (fileAttachment) {
+        formData.append('image', fileAttachment);
+      }
+
       const response = await fetch(`/api/conversations/${activeChat.id}/messages`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ content: textContent })
+        headers: { 
+          'Authorization': `Bearer ${token}` 
+        }, 
+        body: formData
       });
 
       const result = await response.json();
+      
       if (response.ok && result.success) {
-        // 1. Update the chat window bubbles locally
+        // Update the chat window bubbles locally with the new text or file Url parameters
         setMessages((prev) => [...prev, result.data]);
-        return result.data; // Return the new message data for potential further use
         
-        // 2. Trigger the callback to instantly push the snippet to the sidebar list
+        // Trigger the callback to instantly push the snippet to the sidebar list
         if (onNewMessageSent) {
           onNewMessageSent(result.data);
         }
+        
+        return result.data; 
       }
     } catch (err) {
       console.error('Chat message send failure:', err);
     } finally {
       setSending(false);
     }
-  }, [activeChat]);
+  }, [activeChat, onNewMessageSent]);
+
 
 
   return {
