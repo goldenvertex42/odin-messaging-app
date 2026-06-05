@@ -46,11 +46,14 @@ function SidebarLoading() {
   );
 }
 
-function SidebarHeader({ onCreateConversation }) {
+function SidebarHeader({ onCreateConversation, onRefresh }) {
   return (
     <div className={styles.titleArea}>
       <h3>Conversations</h3>
-      <NewChatButton onCreateConversation={onCreateConversation} />
+      <div className={styles.headerActions}>
+        <button onClick={onRefresh} className={styles.btnRefresh} title="Sync Channels">🔄</button>
+        <NewChatButton onCreateConversation={onCreateConversation} />
+      </div>
     </div>
   );
 }
@@ -90,7 +93,7 @@ function SidebarFooter() {
   );
 }
 
-export default function Sidebar({ conversations = [], activeChatId, currentUserId, onSelectChat, onCreateConversation }) {
+export default function Sidebar({ conversations = [], activeChatId, currentUserId, onSelectChat, onCreateConversation, onRefresh }) {
   const handleCreateConversation = useCallback(
     async (usernames) => {
       if (!onCreateConversation) return null;
@@ -105,7 +108,7 @@ export default function Sidebar({ conversations = [], activeChatId, currentUserI
 
   return (
     <aside className={styles.sidebar} data-testid="sidebar-container">
-      <SidebarHeader onCreateConversation={handleCreateConversation} />
+      <SidebarHeader onCreateConversation={handleCreateConversation} onRefresh={onRefresh} />
       <ConversationList
         conversations={conversations}
         activeChatId={activeChatId}

@@ -7,7 +7,7 @@ import { useConversations } from '../../hooks/useConversations/useConversations'
 import styles from './ConversationsPage.module.css';
 
 export default function ConversationsPage({ user }) {
-  const { conversations, setConversations, loading, error, createConversation } = useConversations();
+  const { conversations, setConversations, loading, error, createConversation, refreshConversations } = useConversations();
   const [activeChat, setActiveChat] = useState(null);
 
   const params = useParams();
@@ -89,6 +89,7 @@ export default function ConversationsPage({ user }) {
         currentUserId={user?.id}
         onSelectChat={setActiveChat}
         onCreateConversation={createConversation}
+        onRefresh={refreshConversations}
       />
       
       {shouldRenderChatWindow ? (
