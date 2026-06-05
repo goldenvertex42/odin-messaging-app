@@ -17,7 +17,10 @@ export default function ActiveFriendsGrid({ friends }) {
               className={styles.friendCard}
               onClick={() => navigate(`/profile/${friend.username}`)}
             >
-              <img src={friend.avatarUrl} alt="" />
+              <div className={styles.avatarWrapper}>
+                <img src={friend.avatarUrl} alt="" />
+                {friend.isOnline && <span className={styles.onlineBadge} data-testid="online-dot" />}
+              </div>
               <h4>{friend.displayName || friend.username}</h4>
               <p>@{friend.username}</p>
             </div>
