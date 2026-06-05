@@ -39,6 +39,44 @@ export const getUserProfile = async (req, res) => {
   }
 };
 
+export const getProfileByUsername = async (req, res, next) => {
+  try {
+    const username = req.query.query;
+    const currentUserId = req.user?.id;
+
+    if (!username || username.trim() === '') {
+      return res.status(200).json({ success: true, data: [] });
+    }
+
+    const matchingUsers = await prisma.user.findMany({
+      where: {
+        username: {
+          startsWith: username.trim(),
+          mode: 'insensitive'
+        },
+        NOT: {
+          id: currentUserId
+        }
+      },
+      select: {
+        id: true,
+        username: true,
+        displayName: true,
+        avatarUrl: true,
+        bio: true
+      },
+      take: 5
+    });
+
+    console.log('Matching users:', matchingUsers);
+
+    return res.status(200).json({ success: true, data: matchingUsers });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
 /**
  * 🎯 SELF-MUTATING PROFILE PATCH
  * Handles profile edits for updates to bio, display name, avatars, and theme states.
