@@ -211,18 +211,27 @@ export const getConversation = async (req, res) => {
 export const createMessage = async (req, res) => {
   try {
     const conversationId = req.params.id;
-    const { content, fileUrl } = req.body;
     const senderId = req.user.id;
+    
+    const { content } = req.body;
+    
+    const fileUrl = req.file ? req.file.path : req.body.fileUrl;
 
-    if (!content || content.trim() === '') {
-      return res.status(400).json({ success: false, error: 'Message content cannot be empty' });
+    // Allow message content to be empty IF a file is attached
+    const hasText = content && content.trim() !== '';
+    const hasFile = !!fileUrl;
+
+    if (!hasText && !hasFile) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Message payload validation exception: content or file attachment required.' 
+      });
     }
 
-    // CRITICAL FIX: Wrapped inside a single database transaction block
     const [message] = await prisma.$transaction([
       prisma.message.create({
         data: {
-          content: content,
+          content: hasText ? content.trim() : null,
           fileUrl: fileUrl || null,
           conversationId: conversationId,
           senderId: senderId
@@ -239,3 +248,4 @@ export const createMessage = async (req, res) => {
     return res.status(500).json({ success: false, error: error.message });
   }
 };
+
