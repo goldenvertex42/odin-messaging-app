@@ -29,18 +29,31 @@ const server = setupServer(
     });
   }),
 
-  // POST: Send new message
   http.post('/api/conversations/:id/messages', async ({ request }) => {
-    const body = await request.json();
-    return HttpResponse.json({
-      success: true,
-      data: {
-        id: 'msg_new',
-        content: body.content,
-        createdAt: new Date().toISOString()
-      }
+    try {
+      // 1. Core Fix: Read the transmission boundary payload as Form Data entries
+      const formData = await request.formData();
+      
+      // 2. Extract your text caption field parameter from the form layout boundary
+      const textContent = formData.get('content') || '';
+
+      return HttpResponse.json({ 
+        success: true, 
+        data: { 
+          id: 'msg_new', 
+          content: textContent, 
+          createdAt: new Date().toISOString() 
+        } 
     });
+    } catch (err) {
+      // Fallback block safeguard if an unexpected JSON payload hits the sandbox routing track
+      return new HttpResponse(JSON.stringify({ success: false, error: err.message }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
   })
+
 );
 
 beforeAll(() => {
