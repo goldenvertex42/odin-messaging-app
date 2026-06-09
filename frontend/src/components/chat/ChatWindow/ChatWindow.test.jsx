@@ -68,12 +68,21 @@ describe('ChatWindow Component - Modular Integration TDD Suite', () => {
       
       // Unified POST handler appending the text block cleanly before re-renders run
       http.post(`${BASE_URL}/api/conversations/${activeChatMock.id}/messages`, async ({ request }) => {
-        capturedBody = await request.json();
-        
-        // Emulate true backend update behavior inside our test context
-        currentChatState.messages = [...currentChatState.messages, newlyCreatedMsg];
-        
-        return HttpResponse.json({ success: true, data: newlyCreatedMsg }, { status: 201 });
+        try {
+          // 1. Parse the incoming multipart request packet as FormData
+          const formData = await request.formData();
+          const contentText = formData.get('content') || '';
+
+          // 2. Map structural metrics into your tracking assertions container variable
+          capturedBody = { content: contentText };
+
+          // Emulate true backend update behavior inside our test context state object matrix
+          currentChatState.messages = [...currentChatState.messages, newlyCreatedMsg];
+          
+          return HttpResponse.json({ success: true, data: newlyCreatedMsg }, { status: 201 });
+        } catch (err) {
+          return new HttpResponse(JSON.stringify({ success: false, error: err.message }), { status: 400 });
+        }
       })
     );
 

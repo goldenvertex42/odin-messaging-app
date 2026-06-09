@@ -2,7 +2,7 @@ import { useChatMessages } from '../../../hooks/useChatMessages/useChatMessages'
 import ChatHeader from './components/ChatHeader/ChatHeader';
 import MessageList from './components/MessageList/MessageList';
 import MessageInput from './components/MessageInput/MessageInput';
-import { getConversationName } from '../../../utils/getConversationName';
+import { getConversationName } from '../../../utils/getConversationName'; // Consuming our augmented utility
 import styles from './ChatWindow.module.css';
 
 export default function ChatWindow({ activeChat, currentUserId, onNewMessageSent }) {
@@ -10,7 +10,6 @@ export default function ChatWindow({ activeChat, currentUserId, onNewMessageSent
 
   const handleInterceptSendMessage = async (textContent, fileAttachment = null) => {
     const newlyCreatedMessage = await sendMessage(textContent, fileAttachment);
-    
     if (onNewMessageSent && newlyCreatedMessage) {
       onNewMessageSent(newlyCreatedMessage);
     }
@@ -24,19 +23,20 @@ export default function ChatWindow({ activeChat, currentUserId, onNewMessageSent
     );
   }
 
-  const resolvedChatTitle = getConversationName(activeChat, currentUserId);
-
-  const companionRecord = !activeChat.isGroup 
-    ? activeChat.participants?.find(p => p.userId !== currentUserId) 
-    : null;
-
-  const partnerUser = companionRecord?.user || null;
+  const chatMeta = getConversationName(activeChat, currentUserId);
+  const resolvedChatTitle = chatMeta.toString();
+  const partnerUser = chatMeta.targetUser;
 
   const isPartnerOnline = partnerUser ? partnerUser.isOnline === true : false;
 
   return (
     <section className={styles.window} data-testid="chat-window-container">
-      <ChatHeader title={resolvedChatTitle} isOnline={isPartnerOnline} isGroup={activeChat.isGroup} />
+      <ChatHeader 
+        title={resolvedChatTitle} 
+        isOnline={isPartnerOnline} 
+        isGroup={activeChat.isGroup} 
+        profileUsername={partnerUser?.username} 
+      />
       <MessageList messages={messages} currentUserId={currentUserId} isGroup={activeChat.isGroup} />
       <MessageInput onSendMessage={handleInterceptSendMessage} disabled={sending} />
     </section>
