@@ -3,18 +3,8 @@ import { Link } from 'react-router';
 import LoadingSpinner from '../../ui/LoadingSpinner/LoadingSpinner';
 import NewChatButton from './components/NewChatButton/NewChatButton';
 import { useAuth } from '../../../context/AuthContext';
+import { getConversationName } from '../../../utils/getConversationName';
 import styles from './Sidebar.module.css';
-
-const getConversationTitle = (chat, currentUserId) => {
-  if (chat.isGroup) {
-    return chat.name || 'Unnamed Group';
-  }
-  // Safely lookup the foreign chat partner profile mapping
-  const recipient = chat.participants?.find(
-    p => (p.userId !== currentUserId) && (p.user?.id !== currentUserId)
-  );
-  return recipient?.user?.displayName || recipient?.user?.username || 'Odin User';
-};
 
 const getPreviewText = (chat, currentUserId) => {
   const messages = chat.messages || [];
@@ -60,19 +50,23 @@ function SidebarHeader({ onCreateConversation, onRefresh }) {
 
 function ConversationList({ conversations, activeChatId, currentUserId, onSelectChat }) {
   const isActive = useCallback((chatId) => chatId === activeChatId, [activeChatId]);
-  
+
   return (
     <ul className={styles.list}>
-      {conversations.map((chat) => (
-        <li
-          key={chat.id}
-          className={`${styles.chatItem} ${isActive(chat.id) ? styles.isActive : ''}`}
-          onClick={() => onSelectChat(chat)}
-        >
-          <div className={styles.chatName}>{getConversationTitle(chat, currentUserId)}</div>
-          <div className={styles.preview}>{getPreviewText(chat, currentUserId)}</div>
-        </li>
-      ))}
+      {conversations.map((chat) => {
+        const conversationTitle = getConversationName(chat, currentUserId);
+
+        return (
+          <li 
+            key={chat.id} 
+            className={`${styles.chatItem} ${isActive(chat.id) ? styles.isActive : ''}`} 
+            onClick={() => onSelectChat(chat)}
+          >
+            <div className={styles.chatName}>{conversationTitle}</div>
+            <div className={styles.preview}>{getPreviewText(chat, currentUserId)}</div>
+          </li>
+        );
+      })}
     </ul>
   );
 }
