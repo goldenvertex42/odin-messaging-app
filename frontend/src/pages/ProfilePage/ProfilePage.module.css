@@ -55,7 +55,8 @@
   margin-top: 1rem;
 }
 
-.actions button {
+.actions button,
+.navLink {
   padding: 10px 24px;
   border-radius: 8px;
   font-weight: 600;
@@ -65,11 +66,12 @@
   transition: background-color 0.2s ease, opacity 0.2s ease;
 }
 
-.actions button:hover {
+.actions button:hover,
+.navLink:hover {
   opacity: 0.9;
 }
 
-.btnEdit, .btnSave, .btnMessage {
+.btnEdit, .btnSave, .btnMessage, .navLink {
   background-color: var(--accent-color);
   color: var(--bg-sidebar); /* Sharp inversion for readability contrast */
 }
@@ -81,4 +83,37 @@
 
 .btnCancel:hover {
   background-color: var(--btn-action-hover);
+}
+
+.btnAddFriend {
+  background-color: var(--btn-action-bg);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.btnAddFriend:hover:not(:disabled) {
+  background-color: var(--btn-action-hover);
+}
+
+.btnAddFriend:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btnPending {
+  background-color: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: not-allowed;
+}
+
+.navLink {
+  text-decoration: none;
 }
