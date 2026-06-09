@@ -33,3 +33,13 @@
   background-color: #9ca3af; /* Clean, neutral gray */
 }
 
+.profileLink {
+  text-decoration: none;
+  color: inherit; /* Keeps the original text color defined in your header h4 rules */
+  transition: color 0.15s ease;
+}
+
+.profileLink:hover {
+  color: var(--accent-color); /* Dynamically changes to your theme's active accent variant */
+  text-decoration: underline;
+}
