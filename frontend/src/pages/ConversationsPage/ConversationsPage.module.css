@@ -3,15 +3,30 @@
   width: 100vw;
   height: 100dvh; /* Fluid full-screen enforcement */
   overflow: hidden; /* Prevent parent layout clipping */
-  
-  background-color: var(--bg-workspace); 
+  background-color: var(--bg-workspace);
+}
+
+/* Explicit sub-containers to ensure child elements consume full viewport height */
+.sidebarPane,
+.chatPane {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.sidebarPane {
+  width: 320px; /* Preserve original sidebar desktop bounds */
+  flex-shrink: 0;
+}
+
+.chatPane {
+  flex: 1;
 }
 
 .loadingCenter {
   composes: workspace; /* Inherits the base full-screen flex layout */
   justify-content: center;
   align-items: center;
-  
   background-color: var(--bg-workspace);
 }
 
@@ -21,13 +36,21 @@
   justify-content: center;
   align-items: center;
   font-family: sans-serif;
-  
   background-color: var(--bg-workspace);
   color: var(--text-muted);
 }
 
+/* ==========================================================================
+   📱 Responsive Single-View Breakpoint Rule
+   ========================================================================== */
 @media (max-width: 768px) {
-  .workspace {
-    flex-direction: column;
+  .sidebarPane,
+  .chatPane {
+    width: 100%; /* Force active views to take full screen horizontal space */
+  }
+
+  /* Structural block hiding unselected views on mobile devices */
+  .mobileHidden {
+    display: none !important;
   }
 }
