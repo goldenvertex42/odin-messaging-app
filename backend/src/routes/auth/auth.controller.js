@@ -34,12 +34,18 @@ export const registerUser = async (req, res, next) => {
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
+    const seeds = ['Felix', 'Aneka', 'Harley', 'Buster', 'Kiki', 'Casper', 'Socks', 'Spooky', 'Mittens'];
+    const randomSeed = seeds[Math.floor(Math.random() * seeds.length)];
+    const defaultAvatarUrl = `https://api.dicebear.com/10.x/glyphs/svg?seed=${randomSeed}`;
+
     // Create the user record
     const newUser = await prisma.user.create({
       data: { 
         email, 
         username, 
         displayName: displayName || username, 
+        bio: bio || '',
+        avatarUrl: defaultAvatarUrl,
         passwordHash 
       },
       select: {
@@ -109,7 +115,10 @@ export const logoutUser = async (req, res, next) => {
     const currentUserId = req.user?.id;
 
     if (!currentUserId) {
-      return res.status(401).json({ success: false, error: 'Unauthorized payload exception.' });
+      return res.status(401).json({ 
+        success: false, 
+        error: 'Unauthorized payload exception.' 
+      });
     }
 
     if (currentUserId) {
@@ -120,18 +129,11 @@ export const logoutUser = async (req, res, next) => {
       });
     }
 
-    // 2. Clear Passport session tracking records cleanly
-    req.logout((err) => {
-      if (err) {
-        return next(err);
-      }
-      
-      // 3. Return a clean JSON status instead of res.redirect
-      return res.status(200).json({ 
-        success: true, 
-        message: "Logged out successfully." 
-      });
+    return res.status(200).json({ 
+      success: true, 
+      message: "Logged out successfully." 
     });
+
   } catch (error) {
     return next(error);
   }
