@@ -20,7 +20,7 @@ export default function FriendSearch() {
         onChange={(e) => setSearchInput(e.target.value)} 
         className={styles.searchInput} 
       />
-      <Link to="/" className={styles.navLink}>Back to Home</Link>
+      <Link to="/conversations" className={styles.navLink}>Back to Chat</Link>
 
       {hasSearched && (
         <div className={styles.suggestionsDropdown}>

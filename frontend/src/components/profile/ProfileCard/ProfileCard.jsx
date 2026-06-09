@@ -63,7 +63,7 @@ export default function ProfileCard({
             </button>
           </>
         )}
-        <Link to="/" className={parentStyles.navLink}>Back to Home</Link>
+        <Link to="/conversations" className={parentStyles.navLink}>Back to Chat</Link>
       </div>
     </div>
   );
