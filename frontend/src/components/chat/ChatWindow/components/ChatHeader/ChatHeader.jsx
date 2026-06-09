@@ -6,6 +6,9 @@ export default function ChatHeader({ title, isOnline, isGroup, profileUsername }
 
   return (
     <header className={styles.header}>
+      <Link to="/conversations" className={styles.backButton} aria-label="Return to conversations list">
+        ⬅️
+      </Link>
       <div className={styles.titleContainer}>
         {isProfileLinkable ? (
           <Link to={`/profile/${profileUsername}`} className={styles.profileLink}>

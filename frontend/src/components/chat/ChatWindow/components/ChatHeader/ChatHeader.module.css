@@ -3,6 +3,20 @@
   align-items: center;
   padding: 1rem;
   border-bottom: 1px solid var(--border-workspace, #e0e0e0);
+  gap: 0.75rem; /* Ensures consistent spacing when the back button mounts */
+}
+
+/* 📱 Default state: Hide the mobile navigation element on Desktop viewports */
+.backButton {
+  display: none;
+  text-decoration: none;
+  font-size: 1.25rem;
+  user-select: none;
+  line-height: 1;
+}
+
+.backButton:hover {
+  opacity: 0.75;
 }
 
 .titleContainer {
@@ -42,4 +56,17 @@
 .profileLink:hover {
   color: var(--accent-color); /* Dynamically changes to your theme's active accent variant */
   text-decoration: underline;
+}
+
+/* ==========================================================================
+   📱 Mobile Touch Target Breakpoint
+   ========================================================================== */
+@media (max-width: 768px) {
+  .backButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;  /* Optimal minimum hit target width for touch screens */
+    min-height: 40px; /* Optimal minimum hit target height for touch screens */
+  }
 }
