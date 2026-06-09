@@ -169,3 +169,24 @@
   color: var(--text-muted); 
   font-family: sans-serif;
 }
+
+/* ==========================================================================
+   📱 Mobile Viewport Fluid Bounds Adjustment
+   ========================================================================== */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100% !important;   /* Force the sidebar to consume full screen width */
+    max-width: 100vw;         /* Explicitly prevent layout clipping overflows */
+    border-right: none;       /* Remove unnecessary border divider on full screen mobile */
+  }
+
+  .footerLink {
+    padding: 0.85rem 0.5rem; /* Increase vertical padding to meet standard 44px hit bounds */
+    font-size: 0.95rem;      /* Bump font size slightly for readability on close displays */
+  }
+  
+  .logoutBtn {
+    padding: 0.85rem 1rem !important;
+    font-size: 0.95rem !important;
+  }
+}

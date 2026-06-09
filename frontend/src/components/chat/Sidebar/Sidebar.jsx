@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { Link } from 'react-router';
+import { useNavigate, Link } from 'react-router';
 import LoadingSpinner from '../../ui/LoadingSpinner/LoadingSpinner';
 import NewChatButton from './components/NewChatButton/NewChatButton';
 import { useAuth } from '../../../context/AuthContext';
@@ -49,18 +49,21 @@ function SidebarHeader({ onCreateConversation, onRefresh }) {
 }
 
 function ConversationList({ conversations, activeChatId, currentUserId, onSelectChat }) {
+  const navigate = useNavigate();
   const isActive = useCallback((chatId) => chatId === activeChatId, [activeChatId]);
 
   return (
     <ul className={styles.list}>
       {conversations.map((chat) => {
         const conversationTitle = getConversationName(chat, currentUserId);
-
         return (
           <li 
             key={chat.id} 
             className={`${styles.chatItem} ${isActive(chat.id) ? styles.isActive : ''}`} 
-            onClick={() => onSelectChat(chat)}
+            onClick={() => {
+              onSelectChat(chat);
+              navigate(`/conversations/${chat.id}`);
+            }} 
           >
             <div className={styles.chatName}>{conversationTitle}</div>
             <div className={styles.preview}>{getPreviewText(chat, currentUserId)}</div>
@@ -70,6 +73,7 @@ function ConversationList({ conversations, activeChatId, currentUserId, onSelect
     </ul>
   );
 }
+
 
 function SidebarFooter() {
   const { logout } = useAuth();
