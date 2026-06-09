@@ -6,8 +6,10 @@ import { prisma } from '../../../../db/src/index.js';
  */
 export const getUserProfile = async (req, res) => {
   const { username } = req.params;
+  const currentUserId = req.user?.id; // Extracted via your auth gating middleware
 
   try {
+    // 1. Locate the requested base profile information
     const userProfile = await prisma.user.findUnique({
       where: { username },
       select: {
@@ -16,7 +18,7 @@ export const getUserProfile = async (req, res) => {
         displayName: true,
         bio: true,
         avatarUrl: true,
-        themePreference: true, // Returns SLATE, EMERALD, OCEAN, AMETHYST, or ROSE
+        themePreference: true,
         isOnline: true,
         createdAt: true
       }
@@ -29,15 +31,41 @@ export const getUserProfile = async (req, res) => {
       });
     }
 
+    // 2. Initialize default baseline relationship token status
+    let relationshipStatus = 'NONE';
+
+    // 3. Evaluate context mapping if checking another workspace actor
+    if (currentUserId && currentUserId !== userProfile.id) {
+      const relationshipLedger = await prisma.friendship.findFirst({
+        where: {
+          OR: [
+            { senderId: currentUserId, receiverId: userProfile.id },
+            { senderId: userProfile.id, receiverId: currentUserId }
+          ]
+        }
+      });
+
+      if (relationshipLedger) {
+        // Explicitly map ledger status states straight to frontend string expectations
+        relationshipStatus = relationshipLedger.status; // Returns: 'PENDING' or 'ACCEPTED'
+      }
+    }
+
+    // 4. Return combined dataset back to client useProfileSession engine
     return res.status(200).json({
       success: true,
-      data: userProfile
+      data: {
+        ...userProfile,
+        relationshipStatus // Injected token variable string
+      }
     });
+
   } catch (error) {
     console.error('User profile query failure:', error);
     return res.status(500).json({ success: false, error: error.message });
   }
 };
+
 
 export const getProfileByUsername = async (req, res, next) => {
   try {
