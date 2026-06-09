@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MemoryRouter } from 'react-router';
@@ -32,12 +32,19 @@ describe('ConversationsPage - Cross-Component Integration Suite', () => {
       id: 'chat-xyz-123',
       isGroup: false,
       participants: [
-        { user: { id: 'current-user-id', displayName: 'Odin Boss' } },
-        { user: { id: 'other-user-id', displayName: 'Heimdall' } }
+        { 
+          userId: 'current-user-id',
+          user: { id: 'current-user-id', displayName: 'Odin Boss' } 
+        },
+        { 
+          userId: 'other-user-id',
+          user: { id: 'other-user-id', displayName: 'Heimdall' } 
+        }
       ],
       messages: [{ content: 'Bifrost is open' }]
     }
   ];
+
 
   beforeEach(() => {
     vi.restoreAllMocks();
@@ -66,7 +73,7 @@ describe('ConversationsPage - Cross-Component Integration Suite', () => {
 
   it('should pass selected sidebar conversation data up to the parent layout and open the ChatWindow panel', async () => {
     const user = userEvent.setup();
-
+    
     mockUseConversations.mockReturnValue({
       conversations: sampleChats,
       loading: false,
@@ -81,11 +88,22 @@ describe('ConversationsPage - Cross-Component Integration Suite', () => {
       </MemoryRouter>
     );
 
-    const threadTarget = await screen.findByText('Heimdall');
-    expect(threadTarget).toBeInTheDocument();
+    // 1. CORE FIX: Wrap a standard Case-Insensitive Regex query inside an async waitFor block.
+    // This avoids compiler interpretation bugs entirely while safely searching the JSDOM structure.
+    let threadTargetText;
+    await waitFor(() => {
+      threadTargetText = screen.getByText(/Heimdall/i);
+      expect(threadTargetText).toBeInTheDocument();
+    });
 
-    await user.click(threadTarget);
+    // 2. Safely capture the parent list item row container element holding the onClick trigger
+    const threadTargetRow = threadTargetText.closest('li');
+    expect(threadTargetRow).toBeInTheDocument();
 
+    // 3. Execute the simulation on the true target element block
+    await user.click(threadTargetRow);
+
+    // 4. Confirm the layout opened the matching chat view
     expect(screen.getByTestId('chat-window-mock')).toHaveTextContent('Active: chat-xyz-123');
   });
 });
