@@ -76,3 +76,15 @@
   border: 2px solid var(--bg-sidebar);
   border-radius: 50%;
 }
+
+@media (max-width: 768px) {
+  .mainList {
+    overflow-y: visible; /* Prevent independent scroll nesting issues on touch */
+    padding: 16px;       /* Match padding constraints with Pending Requests */
+  }
+  
+  .grid {
+    /* Auto-fill columns will now elegantly map to single or dual card rows based on width */
+    gap: 16px; 
+  }
+}

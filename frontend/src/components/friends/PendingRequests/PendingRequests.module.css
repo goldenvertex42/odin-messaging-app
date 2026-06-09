@@ -88,3 +88,18 @@
   background-color: #ef4444;
   color: #ffffff;
 }
+
+/* ==========================================================================
+   📱 Mobile Dimension & Border Override
+   ========================================================================== */
+@media (max-width: 768px) {
+  .requestsSection {
+    width: 100% !important;        /* Force section to consume full viewport width */
+    max-width: 100vw;
+    border-right: none !important; /* Strip desktop side border divider */
+    border-bottom: 1px solid var(--border-color); /* Inject clean horizontal separation line */
+    overflow-y: visible;           /* Let parent view handle continuous scrolling */
+    box-sizing: border-box;
+    padding: 16px;                 /* Slightly compress inner whitespace for small screens */
+  }
+}

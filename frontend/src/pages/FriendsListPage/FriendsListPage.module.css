@@ -19,3 +19,17 @@
   font-size: 0.95rem;
   font-style: italic;
 }
+
+/* ==========================================================================
+   📱 Mobile Layout Grid Alignment
+   ========================================================================== */
+@media (max-width: 768px) {
+  .friendsContainer {
+    overflow-y: auto;   /* Drop rigid boundary to allow continuous scroll */
+  }
+
+  .workspaceSplit {
+    flex-direction: column; /* Stack Pending Requests over Active Friends */
+    overflow: visible;      /* Allow child panels to render fully in-stream */
+  }
+}

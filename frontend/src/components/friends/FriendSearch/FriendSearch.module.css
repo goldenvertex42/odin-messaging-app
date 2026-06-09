@@ -106,3 +106,33 @@
 .navLink:hover {
   background-color: var(--btn-action-hover); 
 }
+
+/* ==========================================================================
+   📱 Mobile Search Form Layout Alignment
+   ========================================================================== */
+@media (max-width: 768px) {
+  .searchHeader {
+    flex-direction: column-reverse; /* Position input neatly on top, navigation below */
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .searchInput {
+    max-width: 100%; /* Take full horizontal footprint */
+    padding: 14px;   /* Expand touch hit boundary */
+    font-size: 1rem; /* Enforce browser input stabilization */
+  }
+
+  .navLink {
+    width: 100%;     /* Stretch action link into a large touch target */
+    padding: 12px;   /* Maintain accessible touch size standards */
+    font-size: 0.95rem;
+    box-sizing: border-box;
+  }
+  
+  .suggestionsDropdown {
+    left: 16px;
+    width: calc(100% - 32px);
+    max-width: 100%;
+  }
+}
