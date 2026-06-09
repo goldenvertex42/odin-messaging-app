@@ -117,3 +117,39 @@
 .navLink {
   text-decoration: none;
 }
+
+/* ==========================================================================
+   📱 Mobile Full-Screen Immersive Profile Card Layout
+   ========================================================================== */
+@media (max-width: 768px) {
+  .container {
+    padding: 0;              /* Remove desktop exterior breathing frame space */
+    align-items: stretch;    /* Stretch layout items vertically across screen */
+    justify-content: select; /* Reset alignment anchors */
+  }
+
+  .card {
+    max-width: 100%;         /* Override desktop 520px horizontal width bound */
+    height: 100dvh;          /* Force profile card to consume full screen height */
+    border: none;            /* Clear outer framing boundaries */
+    border-radius: 0;        /* Flatten out desktop corner radius curves */
+    padding: 32px 20px;      /* Compress side padding slightly for narrow screens */
+    box-shadow: none;        /* Remove desktop ambient background shadow matrices */
+    justify-content: center; /* Center profile contents vertically inside viewport */
+  }
+
+  /* 🛠️ Expand button metrics into large touch target zones */
+  .actions {
+    flex-direction: column;  /* Stack action triggers for natural thumb tapping */
+    width: 100%;
+    gap: 12px;
+  }
+
+  .actions button, 
+  .navLink {
+    width: 100%;             /* Allow buttons to span full layout width */
+    padding: 14px;           /* Elevate height footprint to match 44px hit bounds */
+    text-align: center;
+    box-sizing: border-box;
+  }
+}
