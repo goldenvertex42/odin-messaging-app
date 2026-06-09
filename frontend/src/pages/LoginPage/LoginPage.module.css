@@ -1,11 +1,10 @@
-/* frontend/src/pages/LoginPage/LoginPage.module.css */
 .container {
   display: flex;
   height: 100dvh;
   align-items: center;
   justify-content: center;
   background-color: #0f172a;
-  padding: 0 1rem;
+  padding: 2rem 1rem;
   color: #ffffff;
   font-family: sans-serif;
 }
