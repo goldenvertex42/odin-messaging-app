@@ -72,6 +72,54 @@ export const getPendingFriendRequests = async (req, res) => {
   }
 };
 
+export const sendFriendRequest = async (req, res, next) => {
+  try {
+    const senderId = req.user?.id;
+    const { receiverId } = req.body;
+
+    // 1. Guard against sending a request to yourself
+    if (senderId === receiverId) {
+      return res.status(400).json({ success: false, error: "You cannot add yourself as a friend." });
+    }
+
+    // 2. Check for an existing relationship ledger entry (in either direction)
+    const existingRelationship = await prisma.friendship.findFirst({
+      where: {
+        OR: [
+          { senderId, receiverId },
+          { senderId: receiverId, receiverId: senderId }
+        ]
+      }
+    });
+
+    if (existingRelationship) {
+      if (existingRelationship.status === 'PENDING') {
+        return res.status(400).json({ 
+          success: false, 
+          error: existingRelationship.senderId === senderId 
+            ? 'Friend request is already pending.' 
+            : 'This user has already sent you a friend request.' 
+        });
+      }
+      return res.status(400).json({ success: false, error: 'You are already friends with this user.' });
+    }
+
+    // 3. Create the pending track record
+    const newRequest = await prisma.friendship.create({
+      data: {
+        senderId,
+        receiverId,
+        status: 'PENDING'
+      }
+    });
+
+    return res.status(201).json({ success: true, message: 'Friend request sent successfully.', data: newRequest });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+
 export const handleFriendRequestDecision = async (req, res, next) => {
   try {
     const requestId = req.params.id;
