@@ -41,7 +41,8 @@ export default function LoginForm({ onSubmit, loading, error }) {
           disabled={loading}
           value={formData.password} 
           onChange={handleChange} 
-          className={styles.input} 
+          className={styles.input}
+          autoComplete='true' 
         />
       </div>
 
