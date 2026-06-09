@@ -43,3 +43,52 @@
   min-height: 100px;
   resize: vertical; /* Safe parameter control for text wrapping fields */
 }
+
+.avatarSection {
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.gridLabel {
+  margin-bottom: 0.5rem !important;
+  font-weight: 500;
+}
+
+.avatarGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.5rem;
+  background-color: var(--bg-workspace);
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+}
+
+.avatarTile {
+  aspect-ratio: 1;
+  background-color: transparent;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  padding: 0.25rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.avatarTile:hover {
+  background-color: var(--btn-hover);
+}
+
+.avatarTileActive {
+  border-color: var(--accent-color);
+  background-color: var(--btn-hover);
+}
+
+.avatarTileImg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
