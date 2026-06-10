@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { customFetch } from '../../utils/api';
 
 export function useFriendSearch(isOpen, usernameInput, participants = []) {
   const [friends, setFriends] = useState([]);
@@ -14,7 +15,7 @@ export function useFriendSearch(isOpen, usernameInput, participants = []) {
     const fetchFriendsList = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`/api/friends`, {
+        const response = await customFetch(`/api/friends`, {
           headers: { 
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'

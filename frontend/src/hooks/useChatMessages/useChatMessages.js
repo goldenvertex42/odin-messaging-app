@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { customFetch } from '../../utils/api';
 
 export function useChatMessages(activeChat, onNewMessageSent) {
   const [messages, setMessages] = useState([]);
@@ -15,7 +16,7 @@ export function useChatMessages(activeChat, onNewMessageSent) {
     const fetchMessages = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`/api/conversations/${activeChat.id}`, {
+        const response = await customFetch(`/api/conversations/${activeChat.id}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -69,7 +70,7 @@ export function useChatMessages(activeChat, onNewMessageSent) {
         formData.append('image', fileAttachment);
       }
 
-      const response = await fetch(`/api/conversations/${activeChat.id}/messages`, {
+      const response = await customFetch(`/api/conversations/${activeChat.id}/messages`, {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${token}` 

@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { customFetch } from '../utils/api';
 
 const AuthContext = createContext(null);
 
@@ -11,7 +12,7 @@ export const AuthProvider = ({ children }) => {
       const token = localStorage.getItem('token');
       if (token) {
         try {
-          const response = await fetch('/api/auth/me', {
+          const response = await customFetch('/api/auth/me', {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -44,7 +45,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       const token = localStorage.getItem('token');
-      await fetch('/api/auth/logout', {
+      await customFetch('/api/auth/logout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { customFetch } from '../../utils/api';
 
 export function useConversations(getToken) {
   const [conversations, setConversations] = useState([]);
@@ -17,7 +18,7 @@ export function useConversations(getToken) {
       setLoading(true);
       setError(null);
       
-      const response = await fetch(`/api/conversations`, {
+      const response = await customFetch(`/api/conversations`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -59,7 +60,7 @@ export function useConversations(getToken) {
     const isGroup = usernames.length > 1;
 
     try {
-      const response = await fetch(`/api/conversations`, {
+      const response = await customFetch(`/api/conversations`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

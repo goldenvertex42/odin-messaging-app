@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router';
 import { useProfileSession } from '../../hooks/useProfileSession/useProfileSession';
+import { customFetch } from '../../utils/api';
 import ProfileCard from '../../components/profile/ProfileCard/ProfileCard';
 import ProfileEditForm from '../../components/profile/ProfileEditForm/ProfileEditForm';
 import styles from './ProfilePage.module.css';
@@ -25,7 +26,7 @@ export default function ProfilePage({ currentUser, onGlobalThemeChange }) {
 
   const handleInitiateDM = async () => {
     const token = localStorage.getItem('token');
-    const res = await fetch('/api/conversations', {
+    const res = await customFetch('/api/conversations', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,

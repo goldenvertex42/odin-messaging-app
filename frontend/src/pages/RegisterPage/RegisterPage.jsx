@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router';
+import { customFetch } from '../../utils/api';
 import RegisterForm from '../../components/auth/RegisterForm/RegisterForm';
 import styles from './RegisterPage.module.css'
 
@@ -13,7 +14,7 @@ export default function RegisterPage({ onAuthSuccess }) {
     setLoading(true);
 
     try {
-      const response = await fetch(`/api/auth/register`, {
+      const response = await customFetch(`/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(registrationData)

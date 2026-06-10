@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router';
+import { customFetch } from '../../utils/api';
 import LoginForm from '../../components/auth/LoginForm/LoginForm';
 import styles from './LoginPage.module.css';
 
@@ -13,7 +14,7 @@ export default function LoginPage({ onAuthSuccess }) {
     setLoading(true);
 
     try {
-      const response = await fetch(`/api/auth/login`, {
+      const response = await customFetch(`/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(credentials)

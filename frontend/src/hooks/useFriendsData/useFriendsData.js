@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { customFetch } from '../../utils/api';
 
 export default function useFriendsData() {
   const [friends, setFriends] = useState([]);
@@ -11,8 +12,8 @@ export default function useFriendsData() {
     setLoading(true);
 
     Promise.all([
-      fetch('/api/friends', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
-      fetch('/api/friends/requests', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.ok ? res.json() : [])
+      customFetch('/api/friends', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
+      customFetch('/api/friends/requests', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.ok ? res.json() : [])
     ])
       .then(([friendsData, requestsData]) => {
         // Extract array if nested, or fall back safely to an empty array
@@ -38,7 +39,7 @@ export default function useFriendsData() {
 
   const processRequest = useCallback(async (requestId, targetFriend, actionType) => {
     try {
-      const res = await fetch(`/api/friends/requests/${requestId}`, {
+      const res = await customFetch(`/api/friends/requests/${requestId}`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,

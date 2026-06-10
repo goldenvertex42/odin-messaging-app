@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { customFetch } from '../../utils/api';
 
 /**
  * Custom hook to execute a debounced global user search against the Prisma user matrix
@@ -21,7 +22,7 @@ export function useUserSearch(searchInput) {
     const token = localStorage.getItem('token');
 
     const delayDebounce = setTimeout(() => {
-      fetch(`/api/profile/search?query=${query}`, {
+      customFetch(`/api/profile/search?query=${query}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,

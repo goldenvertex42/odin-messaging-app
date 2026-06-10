@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { customFetch } from '../../utils/api';
 
 export function useProfileSession(username, isSelf, currentUser, onGlobalThemeChange) {
   const [profile, setProfile] = useState(null);
@@ -15,7 +16,7 @@ export function useProfileSession(username, isSelf, currentUser, onGlobalThemeCh
     setLoading(true);
     const token = localStorage.getItem('token');
     
-    fetch(`/api/profile/${targetUser}`, {
+    customFetch(`/api/profile/${targetUser}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -55,7 +56,7 @@ export function useProfileSession(username, isSelf, currentUser, onGlobalThemeCh
   const handleSave = async () => {
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch('/api/profile', {
+      const res = await customFetch('/api/profile', {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -79,7 +80,7 @@ export function useProfileSession(username, isSelf, currentUser, onGlobalThemeCh
 
   const handleSendFriendRequest = async (receiverId) => {
     const token = localStorage.getItem('token');
-    const res = await fetch('/api/friends/requests', {
+    const res = await customFetch('/api/friends/requests', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
