@@ -130,18 +130,22 @@
   .container {
     padding: 0;              
     align-items: stretch;    
+    height: 100svh;             /* 🏆 Short viewport height handles iOS navigation bars */
+    min-height: -webkit-fill-available; /* Stabilizes rendering engines on Safari */
+    overflow-y: auto;
   }
 
   .card {
     max-width: 100%;         
-    min-height: 100dvh;      /* Change from fixed height to fluid min-height */
-    height: auto;            /* Allow card to expand naturally if forms grow */
+    height: 100%;               /* Force card to match the strict svh window */
+    min-height: 100svh;
     border: none;            
     border-radius: 0;        
-    padding: 32px 20px;      
+    padding: 24px 16px;         /* Compress padding tighter for thin screens */
     box-shadow: none;        
-    justify-content: center; 
-    margin: 0;               /* Remove auto margin constraints on small screens */
+    justify-content: flex-start; /* Mount from top to prevent upper avatar clipping */
+    overflow-y: auto;           /* Allow inside contents to scroll independently */
+    box-sizing: border-box;
   }
 
   /* 🛠️ Expand button metrics into large touch target zones */
