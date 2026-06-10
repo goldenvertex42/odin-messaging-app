@@ -28,7 +28,7 @@ const allowedOrigin = process.env.VITE_API_URL
 
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' ? process.env.PRODUCTION_FRONTEND_URL : allowedOrigin,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH','DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true, 
   optionsSuccessStatus: 200 
