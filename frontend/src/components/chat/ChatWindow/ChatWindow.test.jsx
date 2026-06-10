@@ -2,6 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { http, HttpResponse } from 'msw';
+import { MemoryRouter } from 'react-router';
 import { server } from '../../../mocks/server';
 import ChatWindow from './ChatWindow';
 
@@ -28,7 +29,11 @@ describe('ChatWindow Component - Modular Integration TDD Suite', () => {
 
   // 1. TEST EMPTY PLACEHOLDER STATES
   it('should render a clear instruction placeholder when zero chat selections are provided', () => {
-    render(<ChatWindow activeChat={null} currentUserId="current-user-id" />);
+    render(
+      <MemoryRouter>
+        <ChatWindow activeChat={null} currentUserId="current-user-id" />
+      </MemoryRouter>
+    );
     
     expect(screen.getByTestId('chat-window-placeholder')).toBeInTheDocument();
     expect(screen.getByText(/select a conversation channel to start messaging/i)).toBeInTheDocument();
@@ -42,7 +47,11 @@ describe('ChatWindow Component - Modular Integration TDD Suite', () => {
       })
     );
 
-    render(<ChatWindow activeChat={activeChatMock} currentUserId="current-user-id" />);
+    render(
+      <MemoryRouter>
+        <ChatWindow activeChat={activeChatMock} currentUserId="current-user-id" />
+      </MemoryRouter>
+    );
 
     expect(screen.getByRole('heading', { name: /the citadel channel/i })).toBeInTheDocument();
     
@@ -86,7 +95,11 @@ describe('ChatWindow Component - Modular Integration TDD Suite', () => {
       })
     );
 
-    render(<ChatWindow activeChat={activeChatMock} currentUserId="current-user-id" />);
+    render(
+      <MemoryRouter>
+        <ChatWindow activeChat={activeChatMock} currentUserId="current-user-id" />
+      </MemoryRouter>
+    );
 
     // Wait for the initial GET request message list rows to populate the DOM frame first
     expect(await screen.findByText('First entry layout text')).toBeInTheDocument();
