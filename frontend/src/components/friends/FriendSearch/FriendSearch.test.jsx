@@ -50,7 +50,7 @@ describe('FriendSearch Hook-Driven Component Layout Suite', () => {
     );
 
     expect(screen.getByPlaceholderText(/search global users by username\.\.\./i)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /back to home/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /back to chat/i })).toBeInTheDocument();
     
     const dropdownEl = container.querySelector('.mock-dropdown');
     expect(dropdownEl).not.toBeInTheDocument();
