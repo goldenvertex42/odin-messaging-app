@@ -1,18 +1,21 @@
 .container {
   flex: 1;
-  height: 100dvh;
+  height: 100dvh; /* Enforce full screen area without clipping child heights */
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* 🏆 Mount cards at the top so content never clips */
   justify-content: center;
   background-color: var(--bg-workspace);
-  padding: 32px;
-  overflow: hidden;
+  padding: 40px 24px;      /* Generous breathing space for desktop viewports */
+  overflow-y: auto;        /* Move the scroll container to the outer canvas frame */
+  box-sizing: border-box;
+  overflow-y: scroll !important; 
+  -webkit-overflow-scscrolling: touch;
 }
 
 .card {
   width: 100%;
   max-width: 520px;
-  background-color: var(--bg-sidebar); /* Matches high-contrast dark accent base panels */
+  background-color: var(--bg-sidebar); 
   border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 32px;
@@ -21,6 +24,8 @@
   align-items: center;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   transition: border-color 0.25s ease;
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .avatar {
@@ -123,19 +128,20 @@
    ========================================================================== */
 @media (max-width: 768px) {
   .container {
-    padding: 0;              /* Remove desktop exterior breathing frame space */
-    align-items: stretch;    /* Stretch layout items vertically across screen */
-    justify-content: select; /* Reset alignment anchors */
+    padding: 0;              
+    align-items: stretch;    
   }
 
   .card {
-    max-width: 100%;         /* Override desktop 520px horizontal width bound */
-    height: 100dvh;          /* Force profile card to consume full screen height */
-    border: none;            /* Clear outer framing boundaries */
-    border-radius: 0;        /* Flatten out desktop corner radius curves */
-    padding: 32px 20px;      /* Compress side padding slightly for narrow screens */
-    box-shadow: none;        /* Remove desktop ambient background shadow matrices */
-    justify-content: center; /* Center profile contents vertically inside viewport */
+    max-width: 100%;         
+    min-height: 100dvh;      /* Change from fixed height to fluid min-height */
+    height: auto;            /* Allow card to expand naturally if forms grow */
+    border: none;            
+    border-radius: 0;        
+    padding: 32px 20px;      
+    box-shadow: none;        
+    justify-content: center; 
+    margin: 0;               /* Remove auto margin constraints on small screens */
   }
 
   /* 🛠️ Expand button metrics into large touch target zones */
