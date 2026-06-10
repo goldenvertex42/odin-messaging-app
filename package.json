@@ -41,6 +41,7 @@
   },
   "overrides": {
     "cloudinary": "^2.5.1",
-    "@hono/node-server": "^1.13.7"
+    "@hono/node-server": "^1.13.7",
+    "shell-quote": "^1.8.4"
   }
 }
