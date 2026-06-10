@@ -44,7 +44,6 @@ export const registerUser = async (req, res, next) => {
         email, 
         username, 
         displayName: displayName || username, 
-        bio: bio || '',
         avatarUrl: defaultAvatarUrl,
         passwordHash 
       },
