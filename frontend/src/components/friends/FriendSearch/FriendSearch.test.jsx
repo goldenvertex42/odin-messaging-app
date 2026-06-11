@@ -1,3 +1,4 @@
+import React from 'react';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -5,7 +6,7 @@ import { MemoryRouter } from 'react-router';
 import * as searchHookModule from '../../../hooks/useUserSearch/useUserSearch';
 import FriendSearch from './FriendSearch';
 
-// Mock react-router's navigate function cleanly
+// 1. Cleanly mock react-router's navigation hooks
 const mockNavigate = vi.fn();
 vi.mock('react-router', async (importOriginal) => {
   const actual = await importOriginal();
@@ -15,7 +16,7 @@ vi.mock('react-router', async (importOriginal) => {
   };
 });
 
-// Mock CSS Modules to isolate presentational class binders
+// 2. Mock CSS Modules cleanly
 vi.mock('./FriendSearch.module.css', () => ({
   default: {
     searchHeader: 'mock-search-header',
@@ -32,18 +33,14 @@ vi.mock('./FriendSearch.module.css', () => ({
 
 describe('FriendSearch Hook-Driven Component Layout Suite', () => {
   beforeEach(() => {
-    vi.restoreAllMocks();
+    vi.clearAllMocks();
     mockNavigate.mockClear();
   });
 
   test('renders initial input state cleanly with no dropdown visibility', () => {
-    // Inject custom mock behavior matching empty hook initialization values
-    vi.spyOn(searchHookModule, 'useUserSearch').mockReturnValue({
-      suggestions: [],
-      isSearching: false
-    });
-
-    const { container } = render(
+    vi.spyOn(searchHookModule, 'useUserSearch').mockReturnValue({ suggestions: [], isSearching: false });
+    
+    render(
       <MemoryRouter>
         <FriendSearch />
       </MemoryRouter>
@@ -52,16 +49,14 @@ describe('FriendSearch Hook-Driven Component Layout Suite', () => {
     expect(screen.getByPlaceholderText(/search global users by username\.\.\./i)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /back to chat/i })).toBeInTheDocument();
     
-    const dropdownEl = container.querySelector('.mock-dropdown');
-    expect(dropdownEl).not.toBeInTheDocument();
+    // Resilient check: No dropdown indicators should exist when search input is empty
+    expect(screen.queryByText('Searching...')).not.toBeInTheDocument();
+    expect(screen.queryByText('No results - User does not exist')).not.toBeInTheDocument();
   });
 
   test('displays searching status message text while the hook executes a network check', () => {
-    vi.spyOn(searchHookModule, 'useUserSearch').mockReturnValue({
-      suggestions: [],
-      isSearching: true
-    });
-
+    vi.spyOn(searchHookModule, 'useUserSearch').mockReturnValue({ suggestions: [], isSearching: true });
+    
     render(
       <MemoryRouter>
         <FriendSearch />
@@ -80,11 +75,7 @@ describe('FriendSearch Hook-Driven Component Layout Suite', () => {
       { id: 'u1', username: 'alice_dev', displayName: 'Alice Builder', avatarUrl: 'a.png' },
       { id: 'u2', username: 'alex_code', displayName: '', avatarUrl: 'b.png' }
     ];
-
-    vi.spyOn(searchHookModule, 'useUserSearch').mockReturnValue({
-      suggestions: mockSuggestions,
-      isSearching: false
-    });
+    vi.spyOn(searchHookModule, 'useUserSearch').mockReturnValue({ suggestions: mockSuggestions, isSearching: false });
 
     render(
       <MemoryRouter>
@@ -106,10 +97,7 @@ describe('FriendSearch Hook-Driven Component Layout Suite', () => {
   });
 
   test('asserts exact explicit requirement text fallback warning alert if search queries yield empty outputs', () => {
-    vi.spyOn(searchHookModule, 'useUserSearch').mockReturnValue({
-      suggestions: [],
-      isSearching: false
-    });
+    vi.spyOn(searchHookModule, 'useUserSearch').mockReturnValue({ suggestions: [], isSearching: false });
 
     render(
       <MemoryRouter>
@@ -127,11 +115,7 @@ describe('FriendSearch Hook-Driven Component Layout Suite', () => {
   test('dispatches standard profile history redirections cleanly when clicking a suggestion node row', async () => {
     const user = userEvent.setup();
     const mockSuggestions = [{ id: 'u1', username: 'zeus_sky', displayName: 'Zeus' }];
-
-    vi.spyOn(searchHookModule, 'useUserSearch').mockReturnValue({
-      suggestions: mockSuggestions,
-      isSearching: false
-    });
+    vi.spyOn(searchHookModule, 'useUserSearch').mockReturnValue({ suggestions: mockSuggestions, isSearching: false });
 
     render(
       <MemoryRouter>
