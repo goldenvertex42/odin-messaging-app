@@ -17,7 +17,7 @@
 .form input, .form textarea, .form select {
   width: 100%;
   padding: 10px 14px;
-  background-color: #ffffff;
+  background-color: var(--bg-workspace);
   border: 2px solid var(--border-color);
   border-radius: 8px;
   color: var(--text-workspace);
@@ -34,7 +34,7 @@
 }
 
 .form select option {
-  background-color: #ffffff;
+  background-color: var(--bg-workspace);
   color: var(--text-workspace);
 }
 

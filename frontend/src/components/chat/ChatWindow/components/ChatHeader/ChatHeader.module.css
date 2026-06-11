@@ -1,9 +1,17 @@
 .header {
   display: flex;
   align-items: center;
+  justify-content: space-between; /* Separates text elements from the action toggle */
   padding: 1rem;
   border-bottom: 1px solid var(--border-workspace, #e0e0e0);
   gap: 0.75rem; /* Ensures consistent spacing when the back button mounts */
+  background-color: var(--bg-workspace);
+}
+
+.leftGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 /* 📱 Default state: Hide the mobile navigation element on Desktop viewports */
@@ -59,14 +67,53 @@
 }
 
 /* ==========================================================================
-   📱 Mobile Touch Target Breakpoint
+   THEME TOGGLE STYLING
+   ========================================================================== */
+.themeToggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid var(--border-color, #e0e0e0);
+  padding: 6px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  color: var(--text-workspace);
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  user-select: none;
+}
+
+.themeToggle:hover {
+  background-color: var(--btn-hover, #f5f5f5);
+}
+
+.toggleIcon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* ==========================================================================
+   📱 Mobile Touch Target Breakpoints
    ========================================================================== */
 @media (max-width: 768px) {
   .backButton {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 40px;  /* Optimal minimum hit target width for touch screens */
+    min-width: 40px; /* Optimal minimum hit target width for touch screens */
     min-height: 40px; /* Optimal minimum hit target height for touch screens */
+  }
+}
+
+/* Hide the text label on ultra-compact screens to prevent header layout collapse */
+@media (max-width: 400px) {
+  .toggleLabel {
+    display: none;
+  }
+  .themeToggle {
+    padding: 8px;
+    border-radius: 50%;
   }
 }

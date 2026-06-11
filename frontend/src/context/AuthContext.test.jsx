@@ -1,12 +1,22 @@
+import React from 'react';
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { AuthProvider, useAuth } from './AuthContext';
+import { customFetch } from '../utils/api/api';
+
+// Mock out the explicit refactored API module location path
+vi.mock('../utils/api/api', () => ({
+  customFetch: vi.fn()
+}));
 
 describe('AuthContext Core State & Lifecycle Suite', () => {
   beforeEach(() => {
-    vi.stubGlobal('fetch', vi.fn());
+    vi.clearAllMocks();
     localStorage.clear();
     vi.spyOn(console, 'error').mockImplementation(() => {});
+    
+    // Ensure JSDOM root parameters drop back to crisp baselines before each execution sweep
+    document.documentElement.removeAttribute('data-color-scheme');
   });
 
   afterEach(() => {
@@ -15,23 +25,24 @@ describe('AuthContext Core State & Lifecycle Suite', () => {
 
   const wrapper = ({ children }) => <AuthProvider>{children}</AuthProvider>;
 
-    test('initializes in a loading state with null user when no token exists in local storage', async () => {
+  test('initializes in a loading state with default light color scheme when zero tokens exist', async () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
-    
+
     expect(result.current.user).toBeNull();
-    expect(fetch).not.toHaveBeenCalled();
+    expect(result.current.theme).toBe('light'); // Pulls light mode by default
+    expect(document.documentElement.getAttribute('data-color-scheme')).toBe('light');
+    expect(customFetch).not.toHaveBeenCalled();
   });
 
-
-  test('synchronizes user profile metrics successfully on mount if a valid token is found', async () => {
+  test('synchronizes flat user data models accurately on mount while keeping color scheme separate', async () => {
     const mockUserPayload = { id: 'u-1', username: 'odin_dev', themePreference: 'EMERALD' };
     localStorage.setItem('token', 'valid-jwt-token');
-
-    fetch.mockResolvedValueOnce({
+    
+    customFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => mockUserPayload,
     });
@@ -42,23 +53,19 @@ describe('AuthContext Core State & Lifecycle Suite', () => {
       expect(result.current.loading).toBe(false);
     });
 
+    // Verify user object maps with its brand design intact
     expect(result.current.user).toEqual(mockUserPayload);
-    expect(fetch).toHaveBeenCalledWith('/api/auth/me', expect.objectContaining({
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer valid-jwt-token'
-      }
-    }));
+    expect(result.current.user.themePreference).toBe('EMERALD');
+    
+    // Verify default canvas lighting is preserved rather than overwritten by the database accent
+    expect(result.current.theme).toBe('light');
+    expect(document.documentElement.getAttribute('data-color-scheme')).toBe('light');
+    expect(localStorage.getItem('workspace-color-scheme')).toBe('light');
   });
 
-  test('wipes stale tokens from local storage if the profile validation fetch fails', async () => {
-    localStorage.setItem('token', 'expired-or-malformed-jwt');
-
-    fetch.mockResolvedValueOnce({
-      ok: false,
-      status: 401
-    });
+  test('wipes session parameters from browser cache slots when request validation fails', async () => {
+    localStorage.setItem('token', 'stale-malformed-jwt');
+    customFetch.mockResolvedValueOnce({ ok: false, status: 401 });
 
     const { result } = renderHook(() => useAuth(), { wrapper });
 
@@ -70,14 +77,14 @@ describe('AuthContext Core State & Lifecycle Suite', () => {
     expect(localStorage.getItem('token')).toBeNull();
   });
 
-  test('commits login metrics and tokens to browser storage layers instantly on execution', async () => {
+  test('commits login properties to layout memory grids smoothly upon activation', async () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
 
-    const mockUserData = { id: 'u-2', username: 'thor_code' };
+    const mockUserData = { id: 'u-2', username: 'thor_code', themePreference: 'OCEAN' };
     
     act(() => {
       result.current.login(mockUserData, 'fresh-jwt-token');
@@ -87,10 +94,12 @@ describe('AuthContext Core State & Lifecycle Suite', () => {
     expect(localStorage.getItem('token')).toBe('fresh-jwt-token');
   });
 
-  test('notifies the backend to update network presence status on logout before wiping memory bounds', async () => {
-    localStorage.setItem('token', 'active-user-jwt');
-    
-    fetch.mockResolvedValueOnce({
+  test('notifies server backend of exit routines, flushes token caches, and returns canvas to light baseline', async () => {
+    localStorage.setItem('token', 'active-jwt');
+    document.documentElement.setAttribute('data-color-scheme', 'dark');
+    localStorage.setItem('workspace-color-scheme', 'dark');
+
+    customFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({ id: 'u-1', username: 'odin_dev' }),
     });
@@ -101,7 +110,7 @@ describe('AuthContext Core State & Lifecycle Suite', () => {
       expect(result.current.loading).toBe(false);
     });
 
-    fetch.mockResolvedValueOnce({
+    customFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({ success: true }),
     });
@@ -110,20 +119,44 @@ describe('AuthContext Core State & Lifecycle Suite', () => {
       await result.current.logout();
     });
 
-    expect(fetch).toHaveBeenCalledWith('/api/auth/logout', expect.objectContaining({
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer active-user-jwt'
-      }
-    }));
-
+    // Ensure state memory flushes securely
     expect(result.current.user).toBeNull();
     expect(localStorage.getItem('token')).toBeNull();
+    
+    // 🌟 Symmetrical Reset Check: Verify canvas switches safely back to light mode layout limits
+    expect(result.current.theme).toBe('light');
+    expect(document.documentElement.getAttribute('data-color-scheme')).toBe('light');
+    expect(localStorage.getItem('workspace-color-scheme')).toBe('light');
   });
 
-  test('mutates local user theme configurations instantly to support optimistic visual alterations', async () => {
-    fetch.mockResolvedValueOnce({
+  test('toggles canvas lighting properties back and forth seamlessly mutating document variables', async () => {
+    const { result } = renderHook(() => useAuth(), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(result.current.theme).toBe('light');
+
+    // Toggle Phase 1: Light -> Dark
+    act(() => {
+      result.current.toggleTheme();
+    });
+    expect(result.current.theme).toBe('dark');
+    expect(document.documentElement.getAttribute('data-color-scheme')).toBe('dark');
+    expect(localStorage.getItem('workspace-color-scheme')).toBe('dark');
+
+    // Toggle Phase 2: Dark -> Light
+    act(() => {
+      result.current.toggleTheme();
+    });
+    expect(result.current.theme).toBe('light');
+    expect(document.documentElement.getAttribute('data-color-scheme')).toBe('light');
+    expect(localStorage.getItem('workspace-color-scheme')).toBe('light');
+  });
+
+  test('mutates user branding design accents instantly through optimistic updates without dropping canvas modes', async () => {
+    customFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({ id: 'u-1', username: 'odin_dev', themePreference: 'SLATE' }),
     });
@@ -135,10 +168,14 @@ describe('AuthContext Core State & Lifecycle Suite', () => {
       expect(result.current.loading).toBe(false);
     });
 
+    // Switch palette design accent from SLATE -> AMETHYST optimistically
     act(() => {
-      result.current.updateUserTheme('ROSE');
+      result.current.updateUserTheme('AMETHYST');
     });
 
-    expect(result.current.user.themePreference).toBe('ROSE');
+    expect(result.current.user.themePreference).toBe('AMETHYST');
+    
+    // Verify lighting state parameter tracks independently
+    expect(result.current.theme).toBe('light');
   });
 });

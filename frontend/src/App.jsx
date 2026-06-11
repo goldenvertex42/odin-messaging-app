@@ -10,14 +10,14 @@ import { useAuth } from './context/AuthContext';
 import './App.css';
 
 export default function App() {
-  const { user, loading, login, updateUserTheme } = useAuth();
+  const { user, loading, login, updateUserTheme, theme } = useAuth();
 
   if (loading) return <LoadingSpinner />;
 
   const currentAppTheme = user?.themePreference || 'SLATE';
 
   return (
-    <div className="app-viewport-root" data-theme={currentAppTheme}>
+    <div className="app-viewport-root" data-theme={currentAppTheme} data-color-scheme={theme}>
       <Routes>
         <Route path="/login" element={user ? <Navigate to="/conversations" replace /> : <LoginPage onAuthSuccess={login} />} />
         <Route path="/register" element={user ? <Navigate to="/conversations" replace /> : <RegisterPage onAuthSuccess={login} />} />

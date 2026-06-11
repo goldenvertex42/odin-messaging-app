@@ -47,78 +47,160 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ==========================================================================
-   GLOBAL DESIGN MATRIX: 5-OPTION THEME SWITCHER VARIABLES
+   GLOBAL DESIGN MATRIX: EXPLICIT DUAL-COMBINATION PALETTES
    ========================================================================== */
 
-/* 🖤 1. SLATE THEME (Default Engine Skin) */
-:root, [data-theme="SLATE"] {
+/* 🖤 1. SLATE COMBINATIONS */
+[data-theme="SLATE"][data-color-scheme="light"] {
   --bg-sidebar: #1e293b;
   --bg-workspace: #ffffff;
   --border-color: #334155;
+  --border-workspace: #e0e0e0;
   --accent-color: #38bdf8;
   --text-main: #f8fafc;
   --text-muted: #94a3b8;
-  --text-workspace: #0f172a; 
+  --text-muted-workspace: #64748b; 
+  --text-workspace: #0f172a;
   --btn-hover: #334155;
   --btn-action-bg: #334155;
   --btn-action-hover: #475569;
 }
+[data-theme="SLATE"][data-color-scheme="dark"] {
+  --bg-sidebar: #111827;       /* Darker tone for distinct sidebar separation */
+  --bg-workspace: #1f2937;     /* Soft dark background canvas */
+  --border-color: #374151;
+  --border-workspace: #374151;
+  --accent-color: #38bdf8;     /* Core accent branding preserved */
+  --text-main: #f9fafb;
+  --text-muted: #9ca3af;
+  --text-muted-workspace: #9ca3af;
+  --text-workspace: #f3f4f6;   /* Swapped to high-contrast reading text */
+  --btn-hover: #374151;
+  --btn-action-bg: #374151;
+  --btn-action-hover: #4b5563;
+}
 
-/* 💚 2. EMERALD THEME */
-[data-theme="EMERALD"] {
+/* 💚 2. EMERALD COMBINATIONS */
+[data-theme="EMERALD"][data-color-scheme="light"] {
   --bg-sidebar: #064e3b;
   --bg-workspace: #ffffff;
   --border-color: #065f46;
+  --border-workspace: #e0e0e0;
   --accent-color: #34d399;
   --text-main: #f0fdf4;
   --text-muted: #a7f3d0;
-  --text-workspace: #062f22; 
+  --text-muted-workspace: #4b5563; 
+  --text-workspace: #062f22;
+  --btn-hover: #065f46;
+  --btn-action-bg: #065f46;
+  --btn-action-hover: #047857;
+}
+[data-theme="EMERALD"][data-color-scheme="dark"] {
+  --bg-sidebar: #022c22;
+  --bg-workspace: #064e3b;     /* Rich deep-forest dark palette */
+  --border-color: #065f46;
+  --border-workspace: #065f46;
+  --accent-color: #34d399;
+  --text-main: #f0fdf4;
+  --text-muted: #a7f3d0;
+  --text-muted-workspace: #a7f3d0;
+  --text-workspace: #ecfdf5;   /* Minty-white reading text */
   --btn-hover: #065f46;
   --btn-action-bg: #065f46;
   --btn-action-hover: #047857;
 }
 
-/* 💙 3. OCEAN THEME */
-[data-theme="OCEAN"] {
+/* 💙 3. OCEAN COMBINATIONS */
+[data-theme="OCEAN"][data-color-scheme="light"] {
   --bg-sidebar: #0c4a6e;
   --bg-workspace: #ffffff;
   --border-color: #075985;
+  --border-workspace: #e0e0e0;
   --accent-color: #38bdf8;
   --text-main: #f0f9ff;
   --text-muted: #bae6fd;
-  --text-workspace: #0c2533; 
+  --text-muted-workspace: #4b5563;
+  --text-workspace: #0c2533;
+  --btn-hover: #075985;
+  --btn-action-bg: #075985;
+  --btn-action-hover: #0369a1;
+}
+[data-theme="OCEAN"][data-color-scheme="dark"] {
+  --bg-sidebar: #03283e;
+  --bg-workspace: #0c4a6e;     /* Deep abyssal sea canvas */
+  --border-color: #075985;
+  --border-workspace: #075985;
+  --accent-color: #38bdf8;
+  --text-main: #f0f9ff;
+  --text-muted: #bae6fd;
+  --text-muted-workspace: #bae6fd;
+  --text-workspace: #e0f2fe;   /* Soft ice-blue contrast text */
   --btn-hover: #075985;
   --btn-action-bg: #075985;
   --btn-action-hover: #0369a1;
 }
 
-/* 💜 4. AMETHYST THEME */
-[data-theme="AMETHYST"] {
+/* 💜 4. AMETHYST COMBINATIONS */
+[data-theme="AMETHYST"][data-color-scheme="light"] {
   --bg-sidebar: #4c1d95;
   --bg-workspace: #ffffff;
   --border-color: #5b21b6;
+  --border-workspace: #e0e0e0;
   --accent-color: #c084fc;
   --text-main: #f5f3ff;
   --text-muted: #ddd6fe;
+  --text-muted-workspace: #4b5563;
   --btn-hover: #5b21b6;
   --btn-action-bg: #5b21b6;
   --btn-action-hover: #6d28d9;
-  --text-workspace: #2e1065; 
+  --text-workspace: #2e1065;
+}
+[data-theme="AMETHYST"][data-color-scheme="dark"] {
+  --bg-sidebar: #2e1065;
+  --bg-workspace: #4c1d95;
+  --border-color: #5b21b6;
+  --border-workspace: #5b21b6;
+  --accent-color: #c084fc;
+  --text-main: #f5f3ff;
+  --text-muted: #ddd6fe;
+  --text-muted-workspace: #ddd6fe;
+  --text-workspace: #f5f3ff;
+  --btn-hover: #5b21b6;
+  --btn-action-bg: #5b21b6;
+  --btn-action-hover: #6d28d9;
 }
 
-/* 🌹 5. ROSE THEME */
-[data-theme="ROSE"] {
+/* 🌹 5. ROSE COMBINATIONS */
+[data-theme="ROSE"][data-color-scheme="light"] {
   --bg-sidebar: #881337;
   --bg-workspace: #ffffff;
   --border-color: #9f1239;
+  --border-workspace: #e0e0e0;
   --accent-color: #fb7185;
   --text-main: #fff1f2;
   --text-muted: #fecdd3;
+  --text-muted-workspace: #4b5563; 
   --btn-hover: #9f1239;
   --btn-action-bg: #9f1239;
   --btn-action-hover: #be123c;
-  --text-workspace: #4c0519; 
+  --text-workspace: #4c0519;
 }
+[data-theme="ROSE"][data-color-scheme="dark"] {
+  --bg-sidebar: #4c0519;
+  --bg-workspace: #881337;
+  --border-color: #9f1239;
+  --border-workspace: #9f1239;
+  --accent-color: #fb7185;
+  --text-main: #fff1f2;
+  --text-muted: #fecdd3;
+  --text-muted-workspace: #fecdd3;
+  --text-workspace: #fff1f2;
+  --btn-hover: #9f1239;
+  --btn-action-bg: #9f1239;
+  --btn-action-hover: #be123c;
+}
+
+
 
 html, body, #root {
   width: 100vw;

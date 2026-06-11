@@ -14,7 +14,7 @@
   align-items: center;
   justify-content: center;
   background-color: var(--bg-workspace); 
-  color: var(--text-muted); 
+  color: var(--text-muted-workspace); 
   font-family: sans-serif;
 }
 

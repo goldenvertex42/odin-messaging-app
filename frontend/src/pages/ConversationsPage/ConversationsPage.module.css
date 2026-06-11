@@ -37,7 +37,7 @@
   align-items: center;
   font-family: sans-serif;
   background-color: var(--bg-workspace);
-  color: var(--text-muted);
+  color: var(--text-muted-workspace);
 }
 
 /* ==========================================================================
