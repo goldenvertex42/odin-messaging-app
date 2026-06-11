@@ -9,7 +9,15 @@ export const AuthProvider = ({ children }) => {
   
   // 1. Light/Dark Mode tracking is completely distinct from the workspace theme accent colors
   const [colorScheme, setColorScheme] = useState(() => {
-    return localStorage.getItem('workspace-color-scheme') || 'light';
+    const cachedScheme = localStorage.getItem('workspace-color-scheme');
+    if (cachedScheme === 'light' || cachedScheme === 'dark') {
+      return cachedScheme;
+    }
+    
+    // Pierce browser configurations to check if the operating system is requesting dark mode
+    const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    console.log(prefersDarkMode);
+    return prefersDarkMode ? 'dark' : 'light';
   });
 
   // 2. Safely cascade DOM changes only for the background scheme layers

@@ -10,6 +10,8 @@ vi.mock('../utils/api/api', () => ({
 }));
 
 describe('AuthContext Core State & Lifecycle Suite', () => {
+  let matchMediaMockValue = false;
+
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
@@ -17,6 +19,19 @@ describe('AuthContext Core State & Lifecycle Suite', () => {
     
     // Ensure JSDOM root parameters drop back to crisp baselines before each execution sweep
     document.documentElement.removeAttribute('data-color-scheme');
+
+    // 🌟 CENTRAL FIX: Polyfill window.matchMedia for JSDOM sandboxes natively
+    matchMediaMockValue = false; // Reset media query condition to false baseline
+    vi.stubGlobal('matchMedia', vi.fn((query) => ({
+      matches: matchMediaMockValue,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(), // Deprecated layout fallback compatibility mapping
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })));
   });
 
   afterEach(() => {
@@ -25,7 +40,7 @@ describe('AuthContext Core State & Lifecycle Suite', () => {
 
   const wrapper = ({ children }) => <AuthProvider>{children}</AuthProvider>;
 
-  test('initializes in a loading state with default light color scheme when zero tokens exist', async () => {
+  test('initializes in a loading state with default light color scheme when zero tokens exist and media query is false', async () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
 
     await waitFor(() => {
@@ -36,6 +51,20 @@ describe('AuthContext Core State & Lifecycle Suite', () => {
     expect(result.current.theme).toBe('light'); // Pulls light mode by default
     expect(document.documentElement.getAttribute('data-color-scheme')).toBe('light');
     expect(customFetch).not.toHaveBeenCalled();
+  });
+
+  // 🌟 NEW REQUIREMENT TEST: Asserts dark preference cascades accurately straight out of browser settings
+  test('automatically sets theme parameter to dark on first launch if browser query matches prefers-color-scheme: dark', async () => {
+    matchMediaMockValue = true; // Simulate user preference selection at OS layer
+
+    const { result } = renderHook(() => useAuth(), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(result.current.theme).toBe('dark');
+    expect(document.documentElement.getAttribute('data-color-scheme')).toBe('dark');
   });
 
   test('synchronizes flat user data models accurately on mount while keeping color scheme separate', async () => {
@@ -123,7 +152,7 @@ describe('AuthContext Core State & Lifecycle Suite', () => {
     expect(result.current.user).toBeNull();
     expect(localStorage.getItem('token')).toBeNull();
     
-    // 🌟 Symmetrical Reset Check: Verify canvas switches safely back to light mode layout limits
+    // Symmetrical Reset Check: Verify canvas switches safely back to light mode layout limits
     expect(result.current.theme).toBe('light');
     expect(document.documentElement.getAttribute('data-color-scheme')).toBe('light');
     expect(localStorage.getItem('workspace-color-scheme')).toBe('light');
