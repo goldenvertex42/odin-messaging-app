@@ -1,145 +1,170 @@
-import { describe, it, expect, beforeEach, beforeAll, afterAll, afterEach, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
-import { setupServer } from 'msw/node';
-import { http, HttpResponse } from 'msw';
 import { useChatMessages } from './useChatMessages';
+import { customFetch } from '../../utils/api/api';
 
-const MOCK_TOKEN = 'mocked-jwt-pass-token';
-const MOCK_CHAT = { id: 'conv_12345' };
+// 🌟 Aligned path: Mock the exact file layout path enclosing your refactored api utility
+vi.mock('../../utils/api/api', () => ({
+  customFetch: vi.fn()
+}));
 
-// 1. Mock Service Worker Isolation Setup using Relative Paths
-const server = setupServer(
-  // GET: Hydrate historical conversation logs
-  http.get('/api/conversations/:id', ({ params, request }) => {
-    const authHeader = request.headers.get('Authorization');
-    if (authHeader !== `Bearer ${MOCK_TOKEN}`) {
-      return new HttpResponse(null, { status: 401 });
+describe('useChatMessages Custom Hook Suite', () => {
+  const mockToken = 'mock-valid-jwt-token';
+  const mockActiveChat = { id: 'chat-uuid-123', isGroup: false };
+  const mockOnNewMessageSent = vi.fn();
+
+  const mockHydrationPayload = {
+    success: true,
+    data: {
+      messages: [
+        { id: 'm1', content: 'Hello there!', createdAt: '2026-06-11T12:00:00.000Z' },
+        { id: 'm2', content: 'General Kenobi!', createdAt: '2026-06-11T12:01:00.000Z' }
+      ]
     }
-    if (params.id === 'error_500') {
-      return new HttpResponse(null, { status: 500 });
-    }
-    return HttpResponse.json({
-      success: true,
-      data: {
-        messages: [
-          { id: 'msg_1', content: 'Hello World', createdAt: '2026-01-01T00:00:00.000Z' },
-          { id: 'msg_2', content: 'Testing hooks', createdAt: '2026-01-01T00:01:00.000Z' }
-        ]
-      }
-    });
-  }),
+  };
 
-  http.post('/api/conversations/:id/messages', async ({ request }) => {
-    try {
-      // 1. Core Fix: Read the transmission boundary payload as Form Data entries
-      const formData = await request.formData();
-      
-      // 2. Extract your text caption field parameter from the form layout boundary
-      const textContent = formData.get('content') || '';
+  const createMockResponse = (ok, status, data, contentType = 'application/json') => {
+    const headersMap = new Map();
+    if (contentType) headersMap.set('content-type', contentType);
 
-      return HttpResponse.json({ 
-        success: true, 
-        data: { 
-          id: 'msg_new', 
-          content: textContent, 
-          createdAt: new Date().toISOString() 
-        } 
-    });
-    } catch (err) {
-      // Fallback block safeguard if an unexpected JSON payload hits the sandbox routing track
-      return new HttpResponse(JSON.stringify({ success: false, error: err.message }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-  })
+    return {
+      ok,
+      status,
+      headers: {
+        get: (key) => headersMap.get(key.toLowerCase())
+      },
+      json: async () => data
+    };
+  };
 
-);
+  beforeEach(() => {
+    vi.clearAllMocks();
+    localStorage.clear();
+    localStorage.setItem('token', mockToken);
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+  });
 
-beforeAll(() => {
-  server.listen({ onUnhandledRequest: 'error' });
-});
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
 
-beforeEach(() => {
-  localStorage.clear();
-  localStorage.setItem('token', MOCK_TOKEN);
-  vi.spyOn(console, 'error').mockImplementation(() => {});
-});
-
-afterEach(() => {
-  server.resetHandlers();
-  vi.restoreAllMocks();
-});
-
-afterAll(() => {
-  server.close();
-});
-
-describe('useChatMessages Hook Testing Suite', () => {
-  it('should initialize with empty messages state and false sending flag', () => {
-    const { result } = renderHook(() => useChatMessages(null));
+  it('should initialize with empty messages and false sending flag when activeChat is null', () => {
+    const { result } = renderHook(() => useChatMessages(null, mockOnNewMessageSent));
+    
     expect(result.current.messages).toEqual([]);
     expect(result.current.sending).toBe(false);
+    expect(customFetch).not.toHaveBeenCalled();
   });
 
-  it('should hydrate historical messages from endpoint on mount with activeChat', async () => {
-    const { result } = renderHook(() => useChatMessages(MOCK_CHAT));
-    
-    await waitFor(() => {
-      expect(result.current.messages).toHaveLength(2);
-    });
-    expect(result.current.messages[0].content).toBe('Hello World');
-    expect(result.current.messages[1].id).toBe('msg_2');
-  });
+  it('should fetch and hydrate conversation histories successfully on mount', async () => {
+    customFetch.mockResolvedValueOnce(
+      createMockResponse(true, 200, mockHydrationPayload)
+    );
 
-  it('should clear message state immediately if activeChat becomes null', async () => {
-    const { result, rerender } = renderHook(({ chat }) => useChatMessages(chat), {
-      initialProps: { chat: MOCK_CHAT }
-    });
+    const { result } = renderHook(() => useChatMessages(mockActiveChat, mockOnNewMessageSent));
 
     await waitFor(() => {
       expect(result.current.messages).toHaveLength(2);
     });
 
-    rerender({ chat: null });
-    
-    await waitFor(() => {
-      expect(result.current.messages).toEqual([]);
-    });
+    expect(result.current.messages[0].content).toBe('Hello there!');
+    expect(customFetch).toHaveBeenCalledWith('/api/conversations/chat-uuid-123', expect.objectContaining({
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${mockToken}`
+      }
+    }));
   });
 
-    it('should manage sending state lifecycle and push messages state linearly on sendMessage', async () => {
-      const { result } = renderHook(() => useChatMessages(MOCK_CHAT));
+  it('should gracefully leave messages array empty and log errors when network response format is invalid', async () => {
+    // Return HTML text instead of valid JSON content headers
+    customFetch.mockResolvedValueOnce(
+      createMockResponse(false, 500, 'Internal Server Error', 'text/html')
+    );
 
-      await waitFor(() => {
-        expect(result.current.messages).toHaveLength(2);
-      });
+    const { result } = renderHook(() => useChatMessages(mockActiveChat, mockOnNewMessageSent));
 
-      let sendPromise;
-      act(() => {
-        sendPromise = result.current.sendMessage('Automated Test Message Log');
-      });
-
-      expect(result.current.sending).toBe(true);
-
-      await act(async () => {
-        await sendPromise;
-      });
-
-      expect(result.current.sending).toBe(false);
-      expect(result.current.messages).toHaveLength(3);
-      expect(result.current.messages[2].content).toBe('Automated Test Message Log');
-      expect(result.current.messages[2].id).toBe('msg_new');
-    });
-
-
-  it('should handle API hydration server rejections gracefully without mutations', async () => {
-    const badChat = { id: 'error_500' };
-    const { result } = renderHook(() => useChatMessages(badChat));
-
-    await waitFor(() => {
+    // Wait to guarantee async promise resolutions ran through catch blocks
+    await vi.waitFor(() => {
       expect(console.error).toHaveBeenCalled();
     });
     expect(result.current.messages).toEqual([]);
+  });
+
+  it('should transmit text and file attachments as FormData inside sendMessage and update local lists', async () => {
+    // 1st call: Mount history hydration
+    customFetch.mockResolvedValueOnce(
+      createMockResponse(true, 200, mockHydrationPayload)
+    );
+
+    const { result } = renderHook(() => useChatMessages(mockActiveChat, mockOnNewMessageSent));
+
+    await waitFor(() => {
+      expect(result.current.messages).toHaveLength(2);
+    });
+
+    // 2nd call: The POST message dispatch action
+    const mockNewMessage = { id: 'm3', content: 'Fresh payload text', fileUrl: 'blob:img' };
+    customFetch.mockResolvedValueOnce(
+      createMockResponse(true, 201, { success: true, data: mockNewMessage })
+    );
+
+    const mockFile = new File(['image-binary'], 'photo.png', { type: 'image/png' });
+    
+    let sentMessageResult;
+    await act(async () => {
+      sentMessageResult = await result.current.sendMessage('Fresh payload text', mockFile);
+    });
+
+    // Verify returning data definitions match
+    expect(sentMessageResult).toEqual(mockNewMessage);
+
+    // Verify messages list array locally appended the fresh node instantly
+    expect(result.current.messages).toHaveLength(3);
+    expect(result.current.messages[2]).toEqual(mockNewMessage);
+
+    // Verify parent sync callback fired cleanly to update the sidebar snippet
+    expect(mockOnNewMessageSent).toHaveBeenCalledWith(mockNewMessage);
+
+    // Assert multi-part form payloads compiled correctly
+    expect(customFetch).toHaveBeenCalledWith('/api/conversations/chat-uuid-123/messages', expect.objectContaining({
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${mockToken}` },
+      body: expect.any(FormData)
+    }));
+  });
+
+  it('should manage the sending loading flag lifecycle reliably throughout request transactions', async () => {
+    customFetch.mockResolvedValueOnce(
+      createMockResponse(true, 200, { success: true, data: { messages: [] } })
+    );
+
+    const { result } = renderHook(() => useChatMessages(mockActiveChat, mockOnNewMessageSent));
+    expect(result.current.sending).toBe(false);
+
+    // Hold the response inside an explicit resolving function block to observe intermediate hook state changes
+    let resolveNetworkPromise;
+    const pendingPromise = new Promise((resolve) => {
+      resolveNetworkPromise = resolve;
+    });
+    customFetch.mockReturnValueOnce(pendingPromise);
+
+    let sendActionPromise;
+    act(() => {
+      sendActionPromise = result.current.sendMessage('Awaiting resolution...');
+    });
+
+    // Verify the hook flips the state flag to true while network thread operates
+    expect(result.current.sending).toBe(true);
+
+    // Resolve the task
+    await act(async () => {
+      resolveNetworkPromise(createMockResponse(true, 201, { success: true, data: { id: 'm4' } }));
+      await sendActionPromise;
+    });
+
+    // Verify loading status safely reverts back to false upon completion
+    expect(result.current.sending).toBe(false);
   });
 });
