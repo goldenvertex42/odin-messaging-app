@@ -1,18 +1,42 @@
+import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { http, HttpResponse } from 'msw';
-import { server } from '../../mocks/server';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderWithRouter } from '../../../tests/test-utils';
 import LoginPage from './LoginPage';
+import { customFetch } from '../../utils/api/api';
 
-describe('LoginPage Component - Integration TDD Suite', () => {
-  const API_URL = 'http://localhost:3000/api';
+// 1. Mock the specific customFetch module that the component utilizes internally
+vi.mock('../../utils/api/api', () => ({
+  customFetch: vi.fn()
+}));
+
+describe('LoginPage Component - Integration Suite', () => {
   const mockOnAuthSuccess = vi.fn();
 
+  // Helper utility to generate realistic network responses containing content-type mock maps
+  const createMockResponse = (ok, status, data, contentTypeString = 'application/json') => {
+    const headersMap = new Map();
+    if (contentTypeString) headersMap.set('content-type', contentTypeString);
+
+    return {
+      ok,
+      status,
+      headers: {
+        get: (key) => headersMap.get(key.toLowerCase())
+      },
+      json: async () => data
+    };
+  };
+
   beforeEach(() => {
-    vi.restoreAllMocks();
+    vi.clearAllMocks();
     mockOnAuthSuccess.mockClear();
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   const waitForRouterToHydrate = async () => {
@@ -38,41 +62,41 @@ describe('LoginPage Component - Integration TDD Suite', () => {
     const user = userEvent.setup();
     const mockUserPayload = { id: 'user-valhalla', username: 'odin_coder' };
     const mockTokenString = 'jwt-valid-token-example';
-    
-    // Create a spy component to ensure the router correctly mounts the targeted layout destination
+
     const mockDashboardComponent = vi.fn(() => <div data-testid="real-dashboard">Dashboard View</div>);
 
-    server.use(
-      http.post(`${API_URL}/auth/login`, () => {
-        return HttpResponse.json(
-          { message: 'Logged in successfully.', user: mockUserPayload, token: mockTokenString },
-          { status: 200 }
-        );
-      })
+    // Provide a valid JSON response structure
+    customFetch.mockResolvedValueOnce(
+      createMockResponse(true, 200, { success: true, user: mockUserPayload, token: mockTokenString })
     );
 
-    // FIXED: Utilizing the dynamic customRoutes parameter configuration!
-    renderWithRouter(<LoginPage onAuthSuccess={mockOnAuthSuccess} />, { 
-      route: '/login', 
+    renderWithRouter(<LoginPage onAuthSuccess={mockOnAuthSuccess} />, {
+      route: '/login',
       path: '/login',
       customRoutes: [
-        {
-          path: '/login',
-          Component: () => <LoginPage onAuthSuccess={mockOnAuthSuccess} />,
-          HydrateFallback: () => <div data-testid="router-sync">Syncing context state...</div>
+        { 
+          path: '/login', 
+          Component: () => <LoginPage onAuthSuccess={mockOnAuthSuccess} />, 
+          HydrateFallback: () => <div data-testid="router-sync">Syncing context state...</div> 
         },
-        {
-          path: '/conversations',
-          Component: mockDashboardComponent
+        { 
+          path: '/conversations', 
+          Component: mockDashboardComponent 
         }
       ]
     });
-    
+
     await waitForRouterToHydrate();
 
     await user.type(screen.getByLabelText(/email address/i), 'tester@odin.com');
     await user.type(screen.getByLabelText(/password/i), 'password123');
     await user.click(screen.getByRole('button', { name: /sign in/i }));
+
+    // Verify background request payload matches specification requirements
+    expect(customFetch).toHaveBeenCalledWith('/api/auth/login', expect.objectContaining({
+      method: 'POST',
+      body: JSON.stringify({ email: 'tester@odin.com', password: 'password123' })
+    }));
 
     // Verify context state callbacks dispatch with exact matching arguments
     await waitFor(() => {
@@ -89,11 +113,9 @@ describe('LoginPage Component - Integration TDD Suite', () => {
   // 3. TEST FAILURES FOR BAD RESPONSES
   it('should display explicit application runtime error messages on a 401 response', async () => {
     const user = userEvent.setup();
-
-    server.use(
-      http.post(`${API_URL}/auth/login`, () => {
-        return HttpResponse.json({ message: 'Incorrect email or password.' }, { status: 401 });
-      })
+    
+    customFetch.mockResolvedValueOnce(
+      createMockResponse(false, 401, { message: 'Incorrect email or password.' })
     );
 
     renderWithRouter(<LoginPage onAuthSuccess={mockOnAuthSuccess} />, { route: '/login', path: '/login' });
@@ -111,14 +133,10 @@ describe('LoginPage Component - Integration TDD Suite', () => {
   // 4. TEST TOTAL BACKEND FALLBACK PROTECTION CRASHES
   it('should intercept invalid HTML content type responses cleanly without crashing the frame', async () => {
     const user = userEvent.setup();
-
-    server.use(
-      http.post(`${API_URL}/auth/login`, () => {
-        return new HttpResponse('<!DOCTYPE html><html>Oops!</html>', {
-          status: 500,
-          headers: { 'Content-Type': 'text/html' }
-        });
-      })
+    
+    // Simulate a raw server crash page response containing text/html headers
+    customFetch.mockResolvedValueOnce(
+      createMockResponse(false, 500, '<!DOCTYPE html><html>Oops!</html>', 'text/html')
     );
 
     renderWithRouter(<LoginPage onAuthSuccess={mockOnAuthSuccess} />, { route: '/login', path: '/login' });
