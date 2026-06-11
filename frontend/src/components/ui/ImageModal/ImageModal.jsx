@@ -13,7 +13,7 @@ export default function ImageModal({ imageUrl, altText = "Enlarged media preview
   if (!imageUrl) return null;
 
   return (
-    <div className={styles.overlay} onClick={onClose} role="dialog" aria-modal="true">
+    <div className={styles.overlay} onClick={onClose} role="dialog" aria-modal="true" aria-label="Image preview modal" data-testid="modal-backdrop">
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         {/* Close Button Action Trigger */}
         <button className={styles.closeButton} onClick={onClose} aria-label="Close image viewer">
