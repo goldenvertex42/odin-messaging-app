@@ -10,7 +10,7 @@ export const getUserProfile = async (req, res) => {
 
   try {
     await prisma.user.update({
-      where: { id: userId },
+      where: { id: currentUserId },
       data: { isOnline: true } // Forces database parity across multi-device tabs
     });
 
