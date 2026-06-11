@@ -21,4 +21,27 @@
   color: var(--text-muted);
 }
 
+.view h2,
+.handle,
+.bio {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+}
+
+@media (max-width: 768px) {
+  .view h2 {
+    font-size: 1.6rem !important; /* Slightly scale down for small screen ratios */
+    font-weight: 700;
+  }
+
+  .handle {
+    font-size: 0.95rem !important;
+  }
+
+  .bio {
+    font-size: 1rem !important;
+    line-height: 1.5 !important;
+  }
+}
+
+
 
