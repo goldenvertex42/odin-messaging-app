@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { customFetch } from '../../utils/api';
+import { customFetch } from '../../utils/api/api';
 
 export function useFriendSearch(isOpen, usernameInput, participants = []) {
   const [friends, setFriends] = useState([]);

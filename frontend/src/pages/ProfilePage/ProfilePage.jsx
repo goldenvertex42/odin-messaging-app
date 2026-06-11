@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router';
 import { useProfileSession } from '../../hooks/useProfileSession/useProfileSession';
-import { customFetch } from '../../utils/api';
+import { customFetch } from '../../utils/api/api';
 import ProfileCard from '../../components/profile/ProfileCard/ProfileCard';
 import ProfileEditForm from '../../components/profile/ProfileEditForm/ProfileEditForm';
 import styles from './ProfilePage.module.css';

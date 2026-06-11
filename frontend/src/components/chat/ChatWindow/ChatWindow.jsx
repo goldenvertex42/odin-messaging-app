@@ -4,7 +4,7 @@ import ChatHeader from './components/ChatHeader/ChatHeader';
 import MessageList from './components/MessageList/MessageList';
 import MessageInput from './components/MessageInput/MessageInput';
 import ImageModal from '../../ui/ImageModal/ImageModal';
-import { getConversationName } from '../../../utils/getConversationName'; // Consuming our augmented utility
+import { getConversationName } from '../../../utils/getConversationName/getConversationName'; // Consuming our augmented utility
 import styles from './ChatWindow.module.css';
 
 export default function ChatWindow({ activeChat, currentUserId, onNewMessageSent }) {

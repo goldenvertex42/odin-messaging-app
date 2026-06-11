@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router';
 import LoadingSpinner from '../../ui/LoadingSpinner/LoadingSpinner';
 import NewChatButton from './components/NewChatButton/NewChatButton';
 import { useAuth } from '../../../context/AuthContext';
-import { getConversationName } from '../../../utils/getConversationName';
+import { getConversationName } from '../../../utils/getConversationName/getConversationName';
 import styles from './Sidebar.module.css';
 
 const getPreviewText = (chat, currentUserId) => {
@@ -76,7 +76,7 @@ function ConversationList({ conversations, activeChatId, currentUserId, onSelect
 
 
 function SidebarFooter() {
-  const { logout } = useAuth();
+  const { logout, theme, toggleTheme } = useAuth();
 
   return (
     <div className={styles.footer}>
@@ -84,6 +84,15 @@ function SidebarFooter() {
         <Link to="/friends" className={styles.footerLink}>👥 Friends</Link>
         <Link to="/profile" className={styles.footerLink}>👤 Profile</Link>
       </div>
+      <button 
+        type="button"
+        className={styles.sidebarThemeToggle}
+        onClick={toggleTheme}
+        aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+      >
+        <span>{theme === 'light' ? '🌙' : '☀️'}</span>
+        <span>{theme === 'light' ? 'Too Bright?' : 'Too Dark?'}</span>
+      </button>
       <Link to="/logout" className={styles.logoutBtn} onClick={logout}>
         Logout
       </Link>

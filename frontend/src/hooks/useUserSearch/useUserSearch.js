@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { customFetch } from '../../utils/api';
+import { customFetch } from '../../utils/api/api';
 
 /**
  * Custom hook to execute a debounced global user search against the Prisma user matrix

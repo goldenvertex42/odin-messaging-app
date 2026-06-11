@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { customFetch } from '../../utils/api';
+import { customFetch } from '../../utils/api/api';
 
 export function useConversations(getToken) {
   const [conversations, setConversations] = useState([]);

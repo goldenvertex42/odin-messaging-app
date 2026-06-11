@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router';
-import { customFetch } from '../../utils/api';
+import { customFetch } from '../../utils/api/api';
 import LoginForm from '../../components/auth/LoginForm/LoginForm';
 import styles from './LoginPage.module.css';
 

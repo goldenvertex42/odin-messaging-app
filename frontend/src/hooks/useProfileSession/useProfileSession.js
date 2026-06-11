@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { customFetch } from '../../utils/api';
+import { customFetch } from '../../utils/api/api';
 
 export function useProfileSession(username, isSelf, currentUser, onGlobalThemeChange) {
   const [profile, setProfile] = useState(null);

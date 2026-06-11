@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router';
-import { customFetch } from '../../utils/api';
+import { customFetch } from '../../utils/api/api';
 import RegisterForm from '../../components/auth/RegisterForm/RegisterForm';
 import styles from './RegisterPage.module.css'
 
