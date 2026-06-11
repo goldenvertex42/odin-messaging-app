@@ -1,6 +1,6 @@
 import styles from './MessageBubble.module.css';
 
-export default function MessageBubble({ message, currentUserId, isGroup }) {
+export default function MessageBubble({ message, currentUserId, isGroup, onImageClick }) {
   // Safe validation fallback check for message context mapping
   if (!message) return null;
 
@@ -21,7 +21,13 @@ export default function MessageBubble({ message, currentUserId, isGroup }) {
         
         {message.fileUrl && (
           <div className={styles.mediaAttachment}>
-            <img src={message.fileUrl} alt="Shared asset payload" className={styles.previewImage} />
+            <img 
+              src={message.fileUrl} 
+              alt="Shared asset payload" 
+              className={styles.previewImage} 
+              onClick={() => onImageClick && onImageClick(message.fileUrl)}
+              style={{ cursor: 'zoom-in' }}
+            />
           </div>
         )}
         

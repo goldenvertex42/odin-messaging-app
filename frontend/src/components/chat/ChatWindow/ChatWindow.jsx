@@ -1,12 +1,15 @@
+import { useState } from 'react';
 import { useChatMessages } from '../../../hooks/useChatMessages/useChatMessages';
 import ChatHeader from './components/ChatHeader/ChatHeader';
 import MessageList from './components/MessageList/MessageList';
 import MessageInput from './components/MessageInput/MessageInput';
+import ImageModal from '../../ui/ImageModal/ImageModal';
 import { getConversationName } from '../../../utils/getConversationName'; // Consuming our augmented utility
 import styles from './ChatWindow.module.css';
 
 export default function ChatWindow({ activeChat, currentUserId, onNewMessageSent }) {
   const { messages, sending, sendMessage } = useChatMessages(activeChat);
+  const [previewImageUrl, setPreviewImageUrl] = useState(null);
 
   const handleInterceptSendMessage = async (textContent, fileAttachment = null) => {
     const newlyCreatedMessage = await sendMessage(textContent, fileAttachment);
@@ -37,8 +40,14 @@ export default function ChatWindow({ activeChat, currentUserId, onNewMessageSent
         isGroup={activeChat.isGroup} 
         profileUsername={partnerUser?.username} 
       />
-      <MessageList messages={messages} currentUserId={currentUserId} isGroup={activeChat.isGroup} />
+      <MessageList messages={messages} currentUserId={currentUserId} isGroup={activeChat.isGroup} onImagePreviewRequested={setPreviewImageUrl}  />
       <MessageInput onSendMessage={handleInterceptSendMessage} disabled={sending} />
+      {previewImageUrl && (
+        <ImageModal 
+          imageUrl={previewImageUrl} 
+          onClose={() => setPreviewImageUrl(null)} 
+        />
+      )}
     </section>
   );
 }

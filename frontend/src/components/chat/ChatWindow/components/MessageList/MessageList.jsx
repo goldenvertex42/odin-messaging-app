@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import MessageBubble from '../MessageBubble/MessageBubble';
 import styles from './MessageList.module.css';
 
-export default function MessageList({ messages, currentUserId, isGroup }) {
+export default function MessageList({ messages, currentUserId, isGroup, onImagePreviewRequested }) {
   const bottomRef = useRef(null);
 
   // Automatically scroll down to reveal new messages on stream updates
@@ -23,6 +23,7 @@ export default function MessageList({ messages, currentUserId, isGroup }) {
             message={msg}
             currentUserId={currentUserId}
             isGroup={isGroup}
+            onImageClick={onImagePreviewRequested} 
           />
         ))
       )}
