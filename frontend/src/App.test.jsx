@@ -1,3 +1,4 @@
+import React from 'react';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -51,48 +52,26 @@ vi.mock('./components/ui/LoadingSpinner/LoadingSpinner', () => ({
 }));
 
 describe('App Component - Global Orchestration & Security Suite', () => {
-  
   beforeEach(() => {
     vi.restoreAllMocks();
   });
 
   const appRouteConfig = [
-    {
-      path: '*',
-      Component: App
-    }
+    { path: '*', Component: App }
   ];
 
   test('renders global loading spinner while session verification evaluates', () => {
-    mockUseAuth.mockReturnValue({
-      user: null,
-      loading: true,
-      login: vi.fn(),
-      updateUserTheme: vi.fn()
-    });
-
-    renderWithRouter(null, {
-      route: '/',
-      customRoutes: appRouteConfig
-    });
-
+    mockUseAuth.mockReturnValue({ user: null, loading: true, login: vi.fn(), updateUserTheme: vi.fn(), theme: 'light' });
+    renderWithRouter(null, { route: '/', customRoutes: appRouteConfig });
+    
     expect(screen.getByTestId('app-loading-spinner')).toBeInTheDocument();
     expect(screen.queryByTestId('page-login')).not.toBeInTheDocument();
   });
 
   test('forces unauthenticated requests entering private directories back to login form targets', async () => {
-    mockUseAuth.mockReturnValue({
-      user: null,
-      loading: false,
-      login: vi.fn(),
-      updateUserTheme: vi.fn()
-    });
-
-    renderWithRouter(null, {
-      route: '/conversations',
-      customRoutes: appRouteConfig
-    });
-
+    mockUseAuth.mockReturnValue({ user: null, loading: false, login: vi.fn(), updateUserTheme: vi.fn(), theme: 'light' });
+    renderWithRouter(null, { route: '/conversations', customRoutes: appRouteConfig });
+    
     await waitFor(() => {
       expect(screen.getByTestId('page-login')).toBeInTheDocument();
     });
@@ -100,18 +79,15 @@ describe('App Component - Global Orchestration & Security Suite', () => {
   });
 
   test('routes authenticated users automatically past login boundaries directly into conversational workspace', async () => {
-    mockUseAuth.mockReturnValue({
-      user: { id: 'u1', username: 'odin_boss', themePreference: 'SLATE' },
-      loading: false,
-      login: vi.fn(),
-      updateUserTheme: vi.fn()
+    mockUseAuth.mockReturnValue({ 
+      user: { id: 'u1', username: 'odin_boss', themePreference: 'SLATE' }, 
+      loading: false, 
+      login: vi.fn(), 
+      updateUserTheme: vi.fn(), 
+      theme: 'light' 
     });
-
-    renderWithRouter(null, {
-      route: '/login',
-      customRoutes: appRouteConfig
-    });
-
+    renderWithRouter(null, { route: '/login', customRoutes: appRouteConfig });
+    
     await waitFor(() => {
       expect(screen.getByTestId('page-conversations')).toBeInTheDocument();
     });
@@ -120,63 +96,52 @@ describe('App Component - Global Orchestration & Security Suite', () => {
   });
 
   test('routes authenticated parameters correctly matching active dynamic token routes within workspace layouts', async () => {
-    mockUseAuth.mockReturnValue({
-      user: { id: 'u1', username: 'odin_boss', themePreference: 'SLATE' },
-      loading: false,
-      login: vi.fn(),
-      updateUserTheme: vi.fn()
+    mockUseAuth.mockReturnValue({ 
+      user: { id: 'u1', username: 'odin_boss', themePreference: 'SLATE' }, 
+      loading: false, 
+      login: vi.fn(), 
+      updateUserTheme: vi.fn(), 
+      theme: 'light' 
     });
-
-    renderWithRouter(null, {
-      route: '/conversations/chat-room-xyz',
-      customRoutes: appRouteConfig
-    });
-
+    renderWithRouter(null, { route: '/conversations/chat-room-xyz', customRoutes: appRouteConfig });
+    
     await waitFor(() => {
       expect(screen.getByTestId('page-conversations')).toBeInTheDocument();
     });
   });
 
-  test('applies structural data theme classes cleanly to view root based on active profile preferences', async () => {
-    mockUseAuth.mockReturnValue({
-      user: { id: 'u1', username: 'thor_dev', themePreference: 'AMETHYST' },
-      loading: false,
-      login: vi.fn(),
-      updateUserTheme: vi.fn()
+  test('applies structural data theme and light/dark color scheme attributes cleanly to view root', async () => {
+    mockUseAuth.mockReturnValue({ 
+      user: { id: 'u1', username: 'thor_dev', themePreference: 'AMETHYST' }, 
+      loading: false, 
+      login: vi.fn(), 
+      updateUserTheme: vi.fn(), 
+      theme: 'dark' /* 🌟 Test case: Verify midnight mode handles correctly */
     });
-
-    const { container } = renderWithRouter(null, {
-      route: '/profile',
-      customRoutes: appRouteConfig
-    });
-
+    
+    const { container } = renderWithRouter(null, { route: '/profile', customRoutes: appRouteConfig });
+    
     await waitFor(() => {
       expect(screen.getByTestId('page-profile')).toBeInTheDocument();
     });
-
+    
     const rootViewport = container.querySelector('.app-viewport-root');
+    // Verify premium accent layout binds correctly
     expect(rootViewport).toHaveAttribute('data-theme', 'AMETHYST');
+    // 🌟 Verify explicit light/dark background scheme layers apply safely without conflict
+    expect(rootViewport).toHaveAttribute('data-color-scheme', 'dark');
   });
 
   test('fires login callback execution strings cleanly upon login submission transactions', async () => {
     const mockLoginCallback = vi.fn();
     const user = userEvent.setup();
-
-    mockUseAuth.mockReturnValue({
-      user: null,
-      loading: false,
-      login: mockLoginCallback,
-      updateUserTheme: vi.fn()
-    });
-
-    renderWithRouter(null, {
-      route: '/login',
-      customRoutes: appRouteConfig
-    });
-
+    mockUseAuth.mockReturnValue({ user: null, loading: false, login: mockLoginCallback, updateUserTheme: vi.fn(), theme: 'light' });
+    
+    renderWithRouter(null, { route: '/login', customRoutes: appRouteConfig });
+    
     const triggerBtn = screen.getByRole('button', { name: /simulate login success/i });
     await user.click(triggerBtn);
-
+    
     expect(mockLoginCallback).toHaveBeenCalledTimes(1);
     expect(mockLoginCallback).toHaveBeenCalledWith(
       { id: 'u1', username: 'odin', themePreference: 'EMERALD' },
