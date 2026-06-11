@@ -9,6 +9,11 @@ export const getUserProfile = async (req, res) => {
   const currentUserId = req.user?.id; // Extracted via your auth gating middleware
 
   try {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { isOnline: true } // Forces database parity across multi-device tabs
+    });
+
     // 1. Locate the requested base profile information
     const userProfile = await prisma.user.findUnique({
       where: { username },
