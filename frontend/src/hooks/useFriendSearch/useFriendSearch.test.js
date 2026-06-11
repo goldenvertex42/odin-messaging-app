@@ -1,6 +1,12 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useFriendSearch } from './useFriendSearch';
+import { customFetch } from '../../utils/api/api';
+
+// 1. Mock the specific customFetch module that the hook utilizes internally
+vi.mock('../../utils/api/api', () => ({
+  customFetch: vi.fn()
+}));
 
 describe('useFriendSearch Hook Suite', () => {
   // Mock foundational friends dataset matching your API structure
@@ -14,65 +20,59 @@ describe('useFriendSearch Hook Suite', () => {
   };
 
   beforeEach(() => {
-    vi.stubGlobal('fetch', vi.fn());
+    vi.clearAllMocks();
     localStorage.setItem('token', 'mock-valid-jwt');
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
     localStorage.clear();
   });
 
   test('should filter suggestions dynamically based on partial match inputs case-insensitively', async () => {
-    // Seed the single foundational /api/friends fetch request on mount
-    fetch.mockResolvedValueOnce({
+    // 1. Setup customFetch to return a simulated response object structure
+    customFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => mockFriendsData
     });
 
     const { result, rerender } = renderHook(
       ({ isOpen, input, participants }) => useFriendSearch(isOpen, input, participants),
-      {
-        initialProps: { isOpen: true, input: 'ALICE', participants: [] }
-      }
+      { initialProps: { isOpen: true, input: 'ALICE', participants: [] } }
     );
 
-    // 1. Wait for fetch to resolve and filter down to 'alice_dev'
+    // 2. Wait for the hook to finish processing its initial fetch lifecycle and dynamic filtering
     await waitFor(() => {
       expect(result.current.suggestions).toHaveLength(1);
     });
     expect(result.current.suggestions[0].username).toBe('alice_dev');
 
-    // 2. Trigger re-render with a new search term mutation
+    // 3. Trigger re-render with a new mutated input search term string
     rerender({ isOpen: true, input: 'bo', participants: [] });
 
-    // 3. Verify client-side filtering updates without triggering a new network request
+    // 4. Verify client-side state machine recalculates suggestions instantly without dropping frames
     await waitFor(() => {
       expect(result.current.suggestions).toHaveLength(1);
     });
     expect(result.current.suggestions[0].username).toBe('bob_builder');
-    
-    // Ensure the network endpoint was only hit exactly once on mount
-    expect(fetch).toHaveBeenCalledTimes(1);
+
+    // Ensure the underlying customFetch wrapper endpoint was hit exactly once on modal open
+    expect(customFetch).toHaveBeenCalledTimes(1);
   });
 
   test('should skip users who are already added as active chips in participants', async () => {
-    fetch.mockResolvedValueOnce({
+    customFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => mockFriendsData
     });
 
     const { result } = renderHook(
       ({ isOpen, input, participants }) => useFriendSearch(isOpen, input, participants),
-      {
-        initialProps: { isOpen: true, input: 'bo', participants: ['bob_builder'] }
-      }
+      { initialProps: { isOpen: true, input: 'bo', participants: ['bob_builder'] } }
     );
 
-    // Since 'bob_builder' is a participant chip, the filtered array should result in 0 suggestions
+    // Since 'bob_builder' is explicitly listed in the tracking array, suggestions must return empty
     await waitFor(() => {
       expect(result.current.suggestions).toHaveLength(0);
     });
   });
 });
-
