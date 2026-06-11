@@ -1,15 +1,21 @@
-# Express Backend Workspace (`backend`)
+# 🧠 Backend Express API Gateway (`/backend`)
 
-A modern Node.js Express application utilizing native ES Modules (`import/export`) and automated process monitoring.
+This directory houses our core server engine, Passport authentication strategies, real-time message routes, and CORS verification matrices.
 
-## Core Features
+## 🔒 Security & CORS Matrix
+This backend enforces secure Cross-Origin validation through environment tracking parameters. Ensure that `PRODUCTION_FRONTEND_URL` matches your active live Vercel endpoint exactly, without trailing slashes.
 
-- **Native Env Loading**: Uses Node's built-in `--env-file` execution engine.
-- **Dynamic Local CORS**: Automatically replaces backend production ports with Vite's default dev port (`5173`) to ease local pipeline development.
-- **Boot Smoke Test**: Fires a lightweight connection query against the database workspace the microsecond the server initializes to catch environment configurations early.
+## 📁 Important Directories
+* `src/app.js`: Main server configuration file containing global CORS rules, json body parsing engines, and workspace endpoints.
+* `src/routes/`: Isolated sub-routers mapping parameters cleanly for `/api/auth`, `/api/conversations`, `/api/friends`, and `/api/profile`.
 
-## Local Execution
+## ☁️ Media Attachment & Cloud Storage Architecture
 
-Monorepo orchestration automatically boots this server via the root directory. If isolated execution is needed:
-```bash
-node --env-file=../../.env --watch src/app.js
+The backend handles real-time file attachments (such as user chat photos and custom profile avatar structures) through an isolated multi-part stream upload pipeline [INDEX_1.1.2]:
+
+1. **Local Ingestion:** Requests are intercepted via `multer` memory storage streams.
+2. **Cloud Serialization:** Payloads are handed off securely to the **Cloudinary SDK**, bypassing local disk writes entirely to ensure maximum compatibility with volatile, ephemeral cloud container systems like Railway.
+3. **Database Asset Mapping:** Cloudinary returns a secure, optimized fallback HTTPS URL asset link, which Prisma then commits cleanly to your PostgreSQL transaction loops.
+
+### Testing Binaries via MSW
+Our integration test harness utilizes customized **Mock Service Worker (MSW)** POST interceptors specifically updated to process binary multi-part stream configurations, rather than relying on static application/json mock fixtures.

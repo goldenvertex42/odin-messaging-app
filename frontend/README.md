@@ -1,22 +1,10 @@
-# Vite + React Frontend Workspace (`frontend`)
+# 💻 Frontend UI Application Client Shell (`/frontend`)
 
-This workspace houses the client-side user interface for the monorepo application. It is scaffolded with **Vite** and **React**, stripped of default clutter, and optimized to work seamlessly alongside the shared backend architecture.
+This directory runs our single-page web user interface constructed using Vite + React, React Router v7, and local CSS Module components.
 
-## Core Features
+## 📱 Mobile-First Responsive Symmetries
+All styling structures utilize CSS Module hashes (`.module.css`) combined with viewport units (`100svh`, `100dvh`). This removes layout scaling issues on compact mobile device webviews (like iOS Safari) and locks touch target layouts to an accessible 44px-48px floor.
 
-- **Lightweight Structure**: All default Vite assets, styles, and logos have been removed to keep the template boilerplate minimal and clean.
-- **Pre-configured API Integration**: Features an instant end-to-end `fetch` handshake component inside `App.jsx` to test local cross-origin communications with the Express server right out of the box.
-- **Optimized Port Alignment**: Hardcoded to utilize Vite's standard local dev port (`5173`), matching the dynamic backend CORS configuration perfectly.
-
-## Architecture & Folders
-
-- `/public`: Empty asset folder preserved for static resources (images, icons, manifests) via a hidden `.gitkeep` file.
-- `/src`: Ultra-clean React compilation target containing only your primary rendering layout files (`main.jsx` and `App.jsx`).
-
-## Local Execution
-
-Monorepo orchestration automatically boots this development server concurrently from the root directory via `npm run dev`. If isolated client execution is required, you can target the workspace directly:
-
-```bash
-npm run dev --workspace=packages/frontend
-```
+## 📁 Custom UI Utilities
+* `src/utils/api.js` (`customFetch`): A centralized fetch wrapper that automatically injects user bearer storage tokens and prefixes outgoing paths with our production `VITE_API_URL` when deployed live.
+* `vercel.json`: Handles URL route rewrites globally. Instructs the production CDN to route nested path refreshes (like `/conversations/:id`) to `index.html` to keep client-side navigation paths active.
