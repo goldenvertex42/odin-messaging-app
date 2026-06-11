@@ -1,14 +1,49 @@
 import { renderHook, waitFor, act } from '@testing-library/react';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import useFriendsData from './useFriendsData';
+import { customFetch } from '../../utils/api/api';
+
+// 1. Mock out the specific customFetch module that the hook utilizes internally
+vi.mock('../../utils/api/api', () => ({
+  customFetch: vi.fn()
+}));
 
 describe('useFriendsData Hook Engine Suite', () => {
   beforeEach(() => {
-    vi.restoreAllMocks();
+    vi.clearAllMocks();
     localStorage.clear();
     // Ensure token exists on every cycle sandbox paint
     localStorage.setItem('token', 'mock_jwt_pass_token');
+    vi.spyOn(console, 'error').mockImplementation(() => {});
   });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  // Helper helper to generate responsive, parallel customFetch mock profiles
+  const setupMockEndpoints = (friendsPayload, requestsPayload, patchOk = true) => {
+    customFetch.mockImplementation((url, options) => {
+      if (url === '/api/friends') {
+        return Promise.resolve({
+          ok: true,
+          json: async () => friendsPayload
+        });
+      }
+      if (url === '/api/friends/requests') {
+        return Promise.resolve({
+          ok: true,
+          json: async () => requestsPayload
+        });
+      }
+      if (url.startsWith('/api/friends/requests/')) {
+        return Promise.resolve({
+          ok: patchOk
+        });
+      }
+      return Promise.reject(new Error(`Unhandled mock endpoint: ${url}`));
+    });
+  };
 
   it('should initialize with default states and fetch arrays correctly', async () => {
     const mockFriends = [
@@ -19,21 +54,7 @@ describe('useFriendsData Hook Engine Suite', () => {
       { id: 'r1', sender: { username: 'bob' } }
     ];
 
-    // Mock global fetch resolution vectors
-    vi.stubGlobal('fetch', vi.fn((url) => {
-      if (url === '/api/friends') {
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockFriends)
-        });
-      }
-      if (url === '/api/friends/requests') {
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockRequests)
-        });
-      }
-    }));
+    setupMockEndpoints(mockFriends, mockRequests);
 
     const { result } = renderHook(() => useFriendsData());
 
@@ -41,7 +62,9 @@ describe('useFriendsData Hook Engine Suite', () => {
     expect(result.current.loading).toBe(true);
 
     // Wait for resolution and verify alphabetic sorting logic (Alice before Charlie)
-    await waitFor(() => expect(result.current.loading).toBe(false));
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
 
     expect(result.current.friends).toHaveLength(2);
     expect(result.current.friends[0].displayName).toBe('Alice');
@@ -51,24 +74,13 @@ describe('useFriendsData Hook Engine Suite', () => {
 
   it('should gracefully handle empty arrays and backend extraction envelopes', async () => {
     // Mock standard data payload wrapper envelopes { data: [...] }
-    vi.stubGlobal('fetch', vi.fn((url) => {
-      if (url === '/api/friends') {
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve({ data: [] })
-        });
-      }
-      if (url === '/api/friends/requests') {
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve({ data: [] })
-        });
-      }
-    }));
+    setupMockEndpoints({ data: [] }, { data: [] });
 
     const { result } = renderHook(() => useFriendsData());
 
-    await waitFor(() => expect(result.current.loading).toBe(false));
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
 
     // Confirm safe fallback parsing
     expect(result.current.friends).toEqual([]);
@@ -80,21 +92,13 @@ describe('useFriendsData Hook Engine Suite', () => {
     const initialRequests = [{ id: 'req_123', sender: { username: 'bob' } }];
     const targetFriend = { id: 'u3', username: 'bob', displayName: 'Bob' };
 
-    vi.stubGlobal('fetch', vi.fn((url) => {
-      if (url === '/api/friends') {
-        return Promise.resolve({ ok: true, json: () => Promise.resolve(initialFriends) });
-      }
-      if (url === '/api/friends/requests') {
-        return Promise.resolve({ ok: true, json: () => Promise.resolve(initialRequests) });
-      }
-      // Intercept patch route decision
-      if (url === '/api/friends/requests/req_123') {
-        return Promise.resolve({ ok: true });
-      }
-    }));
+    setupMockEndpoints(initialFriends, initialRequests, true);
 
     const { result } = renderHook(() => useFriendsData());
-    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
 
     // Execute state mutation handler
     await act(async () => {
@@ -112,20 +116,13 @@ describe('useFriendsData Hook Engine Suite', () => {
     const initialFriends = [{ id: 'u1', username: 'alice', displayName: 'Alice' }];
     const initialRequests = [{ id: 'req_123', sender: { username: 'bob' } }];
 
-    vi.stubGlobal('fetch', vi.fn((url) => {
-      if (url === '/api/friends') {
-        return Promise.resolve({ ok: true, json: () => Promise.resolve(initialFriends) });
-      }
-      if (url === '/api/friends/requests') {
-        return Promise.resolve({ ok: true, json: () => Promise.resolve(initialRequests) });
-      }
-      if (url === '/api/friends/requests/req_123') {
-        return Promise.resolve({ ok: true });
-      }
-    }));
+    setupMockEndpoints(initialFriends, initialRequests, true);
 
     const { result } = renderHook(() => useFriendsData());
-    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
 
     await act(async () => {
       await result.current.processRequest('req_123', null, 'REJECTED');
