@@ -18,6 +18,9 @@ odin-messaging-app (Monorepo Root)
 * **Frontend Application Client Shell:** Hosted via **Vercel** ([Live App Link](https://odin-messaging-app-sigma.vercel.app))
 * **Backend Core API Services:** Run via **Railway Build Pack Containers**
 
+> 🔑 **Demo Sandbox Account for Recruiters:**
+> * **Email:** `alice@odin.com`
+> * **Password:** `password123`
 ---
 
 ## 💻 Tech Stack & Tooling Core
