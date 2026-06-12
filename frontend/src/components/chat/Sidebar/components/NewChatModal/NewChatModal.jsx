@@ -37,22 +37,28 @@ export default function NewChatModal({ isOpen, onClose, onCreateConversation }) 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError(''); 
     
     let finalParticipants = [...participants];
     const residual = usernameInput.trim();
+    
     if (residual && !finalParticipants.includes(residual)) {
       finalParticipants.push(residual);
     }
-
+    
     if (finalParticipants.length === 0) {
       setError('Please add at least one username.');
       return;
     }
-
+    
     setLoading(true);
+    
     try {
-      await onCreateConversation(finalParticipants, isGroupChat ? groupName.trim() : null);
+      // 1. Pass groupName explicitly from the state 
+      const nameToPass = isGroupChat ? groupName.trim() : null;
+      await onCreateConversation(finalParticipants, nameToPass);
+      
+      // 2. Clear state ONLY after the API call resolves successfully
       setUsernameInput('');
       setGroupName('');
       setParticipants([]);
@@ -63,6 +69,7 @@ export default function NewChatModal({ isOpen, onClose, onCreateConversation }) 
       setLoading(false);
     }
   };
+
 
   const buttonLabel = loading ? 'Creating...' : isGroupChat ? 'Create Group' : 'Start Chat';
 

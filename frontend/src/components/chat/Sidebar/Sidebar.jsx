@@ -102,9 +102,9 @@ function SidebarFooter() {
 
 export default function Sidebar({ conversations = [], activeChatId, currentUserId, onSelectChat, onCreateConversation, onRefresh }) {
   const handleCreateConversation = useCallback(
-    async (usernames) => {
+    async (usernames, groupName) => {
       if (!onCreateConversation) return null;
-      const newConversation = await onCreateConversation(usernames);
+      const newConversation = await onCreateConversation(usernames, groupName);
       if (newConversation) {
         onSelectChat(newConversation);
       }

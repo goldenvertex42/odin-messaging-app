@@ -66,7 +66,7 @@ export default function ConversationsPage({ user }) {
           activeChatId={liveActiveChat?.id} 
           currentUserId={user?.id} 
           onSelectChat={setActiveChat} 
-          onCreateConversation={createConversation} 
+          onCreateConversation={(usernames, groupName) => createConversation(usernames, groupName)} 
           onRefresh={refreshConversations} 
         />
       </div>

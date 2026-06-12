@@ -69,7 +69,7 @@ export function useConversations(getToken) {
         body: JSON.stringify({
           isGroup,
           usernames,
-          name: isGroup ? (groupName || `Group with ${usernames.slice(0, 2).join(', ')}...`) : `Chat with ${usernames[0]}`
+          name: groupName && groupName.trim() !== '' ? groupName.trim() : null
         })
       });
 
