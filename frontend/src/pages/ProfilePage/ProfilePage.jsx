@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { useProfileSession } from '../../hooks/useProfileSession/useProfileSession';
 import { customFetch } from '../../utils/api/api';
@@ -5,7 +6,7 @@ import ProfileCard from '../../components/profile/ProfileCard/ProfileCard';
 import ProfileEditForm from '../../components/profile/ProfileEditForm/ProfileEditForm';
 import styles from './ProfilePage.module.css';
 
-export default function ProfilePage({ currentUser, onGlobalThemeChange }) {
+export default function ProfilePage({ currentUser, onGlobalThemeChange, setOverrideTheme }) {
   const { username } = useParams();
   const navigate = useNavigate();
   const isSelf = !username || username === currentUser.username;
@@ -23,6 +24,18 @@ export default function ProfilePage({ currentUser, onGlobalThemeChange }) {
     setIsEditing,
     handleSendFriendRequest
   } = useProfileSession(username, isSelf, currentUser, onGlobalThemeChange);
+
+  useEffect(() => {
+    const profileTheme = profile?.themePreference;
+    if (profileTheme) {
+      setOverrideTheme(profileTheme); // Set page owner's theme on mount
+    }
+    
+    return () => {
+      setOverrideTheme(currentUser?.themePreference || 'SLATE'); // Revert on unmount
+    };
+  }, [profile?.themePreference, currentUser?.themePreference, setOverrideTheme]);
+
 
   const handleInitiateDM = async () => {
     const token = localStorage.getItem('token');

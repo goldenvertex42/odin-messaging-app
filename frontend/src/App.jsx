@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router';
 import LoginPage from './pages/LoginPage/LoginPage';
 import RegisterPage from './pages/RegisterPage/RegisterPage';
@@ -11,13 +12,11 @@ import './App.css';
 
 export default function App() {
   const { user, loading, login, updateUserTheme, theme } = useAuth();
-
+  const [activeUserTheme, setActiveUserTheme] = useState(user?.themePreference || 'SLATE');
   if (loading) return <LoadingSpinner />;
 
-  const currentAppTheme = user?.themePreference || 'SLATE';
-
   return (
-    <div className="app-viewport-root" data-theme={currentAppTheme} data-color-scheme={theme}>
+    <div className="app-viewport-root" data-theme={activeUserTheme} data-color-scheme={theme}>
       <Routes>
         <Route path="/login" element={user ? <Navigate to="/conversations" replace /> : <LoginPage onAuthSuccess={login} />} />
         <Route path="/register" element={user ? <Navigate to="/conversations" replace /> : <RegisterPage onAuthSuccess={login} />} />
@@ -29,9 +28,9 @@ export default function App() {
             <Route index element={<ConversationsPage user={user} />} />
           </Route>
           
-          <Route path="/profile" element={<ProfilePage currentUser={user} onGlobalThemeChange={updateUserTheme} />} />
+          <Route path="/profile" element={<ProfilePage currentUser={user} onGlobalThemeChange={updateUserTheme} setOverrideTheme={setActiveUserTheme}/>} />
           
-          <Route path="/profile/:username" element={<ProfilePage currentUser={user} onGlobalThemeChange={updateUserTheme} />} />
+          <Route path="/profile/:username" element={<ProfilePage currentUser={user} onGlobalThemeChange={updateUserTheme} setOverrideTheme={setActiveUserTheme} />} />
           
           <Route path="/friends" element={<FriendsListPage />} />
           
